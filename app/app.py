@@ -26,12 +26,12 @@ app = Flask(__name__)
 def hello_world():
     request_type_str = request.method
     if request_type_str=='GET':
-        path = "static/baseimage.svg"
+        path = "app/static/baseimage.svg"
         return render_template("index.html",href=path)
     else:
         text = request.form['text']
         random_string = uuid.uuid4().hex
-        path = "static/"+random_string +".svg"
+        path = "app/static/"+random_string +".svg"
 
         # Load and Create Dataframe
         boston = load_boston()
@@ -43,7 +43,7 @@ def hello_world():
         
         # Load the model with details
         np_arr = floatsome_to_np_array(text).reshape(1, -1)
-        pkl_filename="TrainedModel/StackedPickle.pkl"
+        pkl_filename="app/TrainedModel/StackedPickle.pkl"
         with open(pkl_filename, 'rb') as file:
             pickle_model = pickle.load(file)
         plot_graphs(model=pickle_model,new_input_arr=np_arr,output_file= path)
