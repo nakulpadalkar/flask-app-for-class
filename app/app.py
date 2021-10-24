@@ -16,6 +16,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import uuid 
+import os
 
 
 app = Flask(__name__)
@@ -26,8 +27,7 @@ app = Flask(__name__)
 def hello_world():
     request_type_str = request.method
     if request_type_str=='GET':
-        path = "static/baseimage.svg"
-        return render_template("index.html",href=path)
+        return render_template("index.html",href="static/baseimage.svg")
     else:
         text = request.form['text']
         random_string = uuid.uuid4().hex
@@ -42,12 +42,15 @@ def hello_world():
         X_train, X_test, y_train, y_test = train_test_split(boston.data, boston.target, test_size=0.25)
         
         # Load the model with details
+        files = [f for f in os.listdir('.') if os.path.isfile(f)]
+        for f in files:
+          print(f)
         np_arr = floatsome_to_np_array(text).reshape(1, -1)
         pkl_filename="app/TrainedModel/StackedPickle.pkl"
         with open(pkl_filename, 'rb') as file:
             pickle_model = pickle.load(file)
         plot_graphs(model=pickle_model,new_input_arr=np_arr,output_file= path)
-        return render_template("index.html",href=path)
+        return render_template("index.html",href=path[4:])
 
 
 def plot_graphs(model,new_input_arr, output_file):
