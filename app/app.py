@@ -26,12 +26,12 @@ app = Flask(__name__)
 def hello_world():
     request_type_str = request.method
     if request_type_str=='GET':
-        path = "app/static/baseimage.svg"
+        path = "static/baseimage.svg"
         return render_template("index.html",href=path)
     else:
         text = request.form['text']
         random_string = uuid.uuid4().hex
-        path = "static/"+random_string +".svg"
+        path = "app/static/"+random_string +".svg"
 
         # Load and Create Dataframe
         boston = load_boston()
