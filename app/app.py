@@ -15,8 +15,7 @@ from sklearn.model_selection import train_test_split, cross_val_score
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
-import uuid 
-import os
+
 
 
 app = Flask(__name__)
