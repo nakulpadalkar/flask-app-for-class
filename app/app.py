@@ -32,7 +32,7 @@ def hello_world():
     else:
         text = request.form['text']
         random_string = uuid.uuid4().hex
-        path = "static/"+random_string +".svg"
+        path = "./static/"+random_string +".svg"
 
         # Load and Create Dataframe
         boston = load_boston()
@@ -51,7 +51,7 @@ def hello_world():
         with open(pkl_filename, 'rb') as file:
             pickle_model = pickle.load(file)
         plot_graphs(model=pickle_model,new_input_arr=np_arr,output_file= path)
-        return render_template("index.html",href=path[4:])
+        return render_template("index.html",href=path[2:])
 
 
 def plot_graphs(model,new_input_arr, output_file):
