@@ -32,7 +32,7 @@ def hello_world():
     else:
         text = request.form['text']
         random_string = uuid.uuid4().hex
-        path = "./app/static/"+random_string +".svg"
+        path = "../app/static/"+random_string +".svg"
 
         # Load and Create Dataframe
         boston = load_boston()
