@@ -47,7 +47,7 @@ def hello_world():
         for f in files:
           print(f)
         np_arr = floatsome_to_np_array(text).reshape(1, -1)
-        pkl_filename="./TrainedModel/StackedPickle.pkl" # remove app/ from the path if you are running this locally.
+        pkl_filename="./app/TrainedModel/StackedPickle.pkl" # remove app/ from the path if you are running this locally.
         with open(pkl_filename, 'rb') as file:
             pickle_model = pickle.load(file)
         plot_graphs(model=pickle_model,new_input_arr=np_arr,output_file= path)
