@@ -35,7 +35,7 @@ def hello_world():
         path = "./static/"+random_string +".svg"
 
         # Load and Create Dataframe
-        boston = load_boston()
+        boston = pd.read_csv("./TrainedModel/BostonHousing.csv")
         df = pd.DataFrame(boston.data, columns = boston.feature_names)
         df['PRICE'] = boston.target
 
