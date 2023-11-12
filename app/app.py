@@ -2,7 +2,6 @@ from flask import Flask, render_template, request
 import numpy as np
 import pandas as pd
 import pickle
-from sklearn.datasets import load_boston
 from sklearn.model_selection import train_test_split, cross_val_score
 # import matplotlib.pyplot as plt
 # import seaborn as sns
@@ -36,11 +35,11 @@ def hello_world():
 
         # Load and Create Dataframe
         boston = pd.read_csv("./TrainedModel/BostonHousing.csv")
-        df = pd.DataFrame(boston.data, columns = boston.feature_names)
-        df['PRICE'] = boston.target
+        df_X = boston.drop(['mdev'], axis=1)
+        df_y = boston['medv']
 
         # Split the data frame
-        X_train, X_test, y_train, y_test = train_test_split(boston.data, boston.target, test_size=0.25)
+        X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.25)
         
         # Load the model with details
         files = [f for f in os.listdir('.') if os.path.isfile(f)]
@@ -55,9 +54,7 @@ def hello_world():
 
 
 def plot_graphs(model,new_input_arr, output_file):
-    data = load_boston()
-    df = pd.DataFrame(data.data, columns = data.feature_names)
-    df['PRICE'] = data.target
+    boston = pd.read_csv("./TrainedModel/BostonHousing.csv")
 
     fig = make_subplots(
     rows=1, cols=2
@@ -65,7 +62,7 @@ def plot_graphs(model,new_input_arr, output_file):
     )
 
     fig.add_trace(
-        go.Scatter(x=df["LSTAT"],y=df['PRICE'],mode='markers',
+        go.Scatter(x=boston["lstat"],y=boston['medv'],mode='markers',
         marker=dict(
                 color="#003366"),
             line=dict(color="#003366",width=1)),
@@ -73,7 +70,7 @@ def plot_graphs(model,new_input_arr, output_file):
     )
 
     fig.add_trace(
-        go.Scatter(x=df['RM'],y=df['PRICE'],mode='markers',
+        go.Scatter(x=boston['rm'],y=boston['medv'],mode='markers',
         marker=dict(
                 color="#FF6600"),
             line=dict(color="#FF6600",width=1)),
