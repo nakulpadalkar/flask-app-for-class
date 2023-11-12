@@ -65,9 +65,9 @@ This creates a copy of the repository in your GitHub account.
 
 2. Run the Flask application:
 
-```
-flask run
-```
+    ```
+    flask run
+    ```
 
 3. Open your web browser and go to `http://127.0.0.1:5000/` to view the app.
 
@@ -80,10 +80,6 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Acknowledgments
-
-- Hat tip to anyone whose code was used
-- Inspiration
-- etc
 
 
 
