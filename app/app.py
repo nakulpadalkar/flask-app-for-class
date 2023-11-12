@@ -2,8 +2,6 @@ from flask import Flask, render_template, request
 import numpy as np
 import pandas as pd
 import joblib
-from sklearn.model_selection import train_test_split
-import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import uuid
@@ -13,43 +11,80 @@ app = Flask(__name__)
 
 @app.route("/", methods=['GET', 'POST'])
 def hello_world():
-    request_type_str = request.method
-    if request_type_str == 'GET':
+    if request.method == 'GET':
         return render_template("index.html", href="static/baseimage.svg")
     else:
         text = request.form['text']
         random_string = uuid.uuid4().hex
-        path = "./static/" + random_string + ".svg"
+        path = f"./static/{random_string}.svg"
 
-        # Load and Create Dataframe
-        boston = pd.read_csv("./app/TrainedModel/BostonHousing.csv")
-        df_X = boston.drop(['medv'], axis=1)
-        df_y = boston['medv']
-
-        # Split the data frame
-        X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.15)
-        
         # Load the model
-        pkl_filename = "./app/TrainedModel/stacked-model.joblib"
-        model = joblib.load(pkl_filename)
+        loaded_object = joblib.load("./app/TrainedModel/stacked-model.joblib")
+        print(f"Type of the loaded object: {type(loaded_object)}")
+
+        if isinstance(loaded_object, dict):
+            print(f"Keys in the loaded dictionary: {loaded_object.keys()}")
+
+        # Prepare input data
         np_arr = floatsome_to_np_array(text).reshape(1, -1)
+
+        # Plot graphs
+        plot_graphs(model, np_arr, path)
         
-        plot_graphs(model=model, new_input_arr=np_arr, output_file=path)
         return render_template("index.html", href=path[2:])
 
 def plot_graphs(model, new_input_arr, output_file):
     boston = pd.read_csv("./app/TrainedModel/BostonHousing.csv")
 
-    # ... [rest of your plot_graphs function remains unchanged] ...
+    fig = make_subplots(rows=1, cols=2)
+
+    # Scatter plot for LSTAT vs MEDV
+    fig.add_trace(
+        go.Scatter(x=boston["lstat"], y=boston['medv'], mode='markers',
+                   marker=dict(color="#003366"),
+                   line=dict(color="#003366", width=1)),
+        row=1, col=1
+    )
+
+    # Scatter plot for RM vs MEDV
+    fig.add_trace(
+        go.Scatter(x=boston['rm'], y=boston['medv'], mode='markers',
+                   marker=dict(color="#FF6600"),
+                   line=dict(color="#FF6600", width=1)),
+        row=1, col=2
+    )
+
+    # Predictions
+    new_preds = model.predict(new_input_arr)
+    RM_input = new_input_arr[0][5]
+    LSTAT_input = new_input_arr[0][12]
+
+    # Add predicted points to the plots
+    fig.add_trace(
+        go.Scatter(x=[LSTAT_input], y=new_preds, mode='markers', name="Predicted Output",
+                   marker=dict(color="#FFCC00", size=15),
+                   line=dict(color="#FFCC00", width=1)),
+        row=1, col=1
+    )
+
+    fig.add_trace(
+        go.Scatter(x=[RM_input], y=new_preds, mode='markers', name="Predicted Output",
+                   marker=dict(color="#6600cc", size=15),
+                   line=dict(color="red", width=1)),
+        row=1, col=2
+    )
+
+    # Update axes and layout
+    fig.update_xaxes(title_text="Lower State Population (%)", row=1, col=1)
+    fig.update_xaxes(title_text="Number of Rooms", row=1, col=2)
+    fig.update_yaxes(title_text="House Prices ($1000)", row=1, col=1)
+    fig.update_layout(height=600, width=1400, title_text="Variation in Housing Prices")
+
+    # Save and show the figure
+    fig.write_image(output_file, width=1200, engine="kaleido")
 
 def floatsome_to_np_array(floats_str):
-    def is_float(s):
-        try:
-            float(s)
-            return True
-        except:
-            return False
-    floats = np.array([float(x) for x in floats_str.split(',') if is_float(x)])
+    floats = np.array([float(x) for x in floats_str.split(',') if x.replace('.', '', 1).isdigit()])
     return floats.reshape(len(floats), 1)
 
 if __name__ == "__main__":
