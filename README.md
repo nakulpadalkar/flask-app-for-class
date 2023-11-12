@@ -47,3 +47,43 @@ This creates a copy of the repository in your GitHub account.
 
 
 
+### Running the Flask App
+
+1. Set the environment variable for Flask:
+
+- On Windows:
+
+  ```
+  set FLASK_APP=app.py
+  ```
+
+- On macOS and Linux:
+
+  ```
+  export FLASK_APP=app.py
+  ```
+
+2. Run the Flask application:
+
+```
+flask run
+```
+
+3. Open your web browser and go to `http://127.0.0.1:5000/` to view the app.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+## Acknowledgments
+
+- Hat tip to anyone whose code was used
+- Inspiration
+- etc
+
+
+
