@@ -6,32 +6,56 @@ from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import uuid
 import os
+from dotenv import load_dotenv
+
+# Assuming your .env file is in the 'app' directory, relative to this script
+dotenv_path = os.path.join(os.path.dirname(__file__), '/', '.env')
+load_dotenv(dotenv_path)
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY')
 
 @app.route("/", methods=['GET', 'POST'])
 def hello_world():
     if request.method == 'GET':
+        # Render the main page
         return render_template("index.html", href="static/baseimage.svg")
     else:
-        text = request.form['text']
-        random_string = uuid.uuid4().hex
-        path = f"./static/{random_string}.svg"
+        try:
+            text = request.form['text']
+            random_string = uuid.uuid4().hex
+            path = f"./static/{random_string}.svg"
 
-        # Load the model
-        loaded_object = joblib.load("./app/TrainedModel/stacked-model.joblib")
-        print(f"Type of the loaded object: {type(loaded_object)}")
+            # Load the model from the joblib file
+            model = joblib.load("./app/TrainedModel/stacked-model.joblib")
 
-        if isinstance(loaded_object, dict):
-            print(f"Keys in the loaded dictionary: {loaded_object.keys()}")
+            # Prepare input data
+            np_arr = floatsome_to_np_array(text)  # Ensure this function returns the correct shape (1, 13)
 
-        # Prepare input data
-        np_arr = floatsome_to_np_array(text).reshape(1, -1)
+            # Check if the input data has the correct shape (1, 13)
+            if np_arr.shape == (1, 13):
+                # Create a DataFrame with the same feature names as the training data
+                feature_names = ['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'b', 'lstat']
+                input_df = pd.DataFrame(np_arr, columns=feature_names)
 
-        # Plot graphs
-        plot_graphs(model, np_arr, path)
-        
-        return render_template("index.html", href=path[2:])
+                # Make a prediction
+                prediction = model.predict(input_df)
+
+                # Plot graphs (assuming the plot_graphs function uses the prediction)
+                plot_graphs(model, np_arr, path)
+
+                # Render the template with the prediction result
+                return render_template("index.html", href=path[2:], prediction=str(prediction))
+            else:
+                # If input data is not the correct shape, flash an error message
+                flash('Input data is not in the correct format. Please enter 13 comma-separated values.', 'danger')
+                return redirect(url_for('hello_world'))
+
+        except Exception as e:
+            # For any other exceptions, flash an error message
+            flash(str(e), 'danger')
+            return redirect(url_for('hello_world'))
+
 
 def plot_graphs(model, new_input_arr, output_file):
     boston = pd.read_csv("./app/TrainedModel/BostonHousing.csv")
@@ -84,8 +108,11 @@ def plot_graphs(model, new_input_arr, output_file):
     fig.write_image(output_file, width=1200, engine="kaleido")
 
 def floatsome_to_np_array(floats_str):
-    floats = np.array([float(x) for x in floats_str.split(',') if x.replace('.', '', 1).isdigit()])
-    return floats.reshape(len(floats), 1)
+    floats = np.array([float(x) for x in floats_str.split(',') if x.strip()], dtype=np.float32)
+    if len(floats) != 13:
+        raise ValueError("Expected 13 comma-separated values.")
+    return floats.reshape(1, 13)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
