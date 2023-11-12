@@ -74,6 +74,7 @@ def hello_world():
 def error_page():
     return render_template("error.html")
 
+
 def plot_graphs(model, new_input_arr, output_file):
     boston = pd.read_csv("./app/TrainedModel/BostonHousing.csv")
 
