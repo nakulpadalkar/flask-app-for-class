@@ -21,6 +21,8 @@ available_models = ['lr', 'Ridge', 'Lasso', 'Tree', 'Random Forest', 'Bagging', 
 @app.route("/", methods=['GET', 'POST'])
 def hello_world():
     prediction_text = None  # Initialize the variable to store prediction text
+    input_data = None  # Initialize the variable to store input data
+
     if request.method == 'GET':
         print("GET request received")
         return render_template("index.html", available_models=available_models)
@@ -43,6 +45,8 @@ def hello_world():
                 print("Input data is in the correct format")
                 feature_names = ['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'b', 'lstat']
                 input_df = pd.DataFrame(np_arr, columns=feature_names)
+                input_data = input_df.to_dict(orient='records')[0]  # Convert input data to a dictionary
+
                 prediction = model.predict(input_df)
 
                 # Convert prediction to text and format it to display
@@ -58,7 +62,7 @@ def hello_world():
             print(f"Error: {str(e)}")
             return redirect(url_for('error_page'))
 
-    return render_template("index.html", prediction_text=prediction_text)
+    return render_template("index.html", prediction_text=prediction_text, input_data=input_data)
 
 @app.route("/error")
 def error_page():

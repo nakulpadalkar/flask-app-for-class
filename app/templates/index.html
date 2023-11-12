@@ -31,8 +31,18 @@
             <button type="submit" class="btn btn-primary">Predict</button>
         </form>
         <div class="mt-4">
+            {% if input_data %}
+                <h2>Input Data:</h2>
+                <ul>
+                    {% for variable, value in input_data.items() %}
+                    <li><strong>{{ variable }}:</strong> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            
             {% if prediction_text %}
-                <p class="alert alert-success">Prediction: {{ prediction_text }}</p>
+                <h2>Prediction:</h2>
+                <p class="alert alert-success">{{ prediction_text }}</p>
             {% endif %}
         </div>
     </div>
