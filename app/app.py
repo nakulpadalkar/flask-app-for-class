@@ -34,8 +34,8 @@ def hello_world():
         path = "./static/"+random_string +".svg"
 
         # Load and Create Dataframe
-        boston = pd.read_csv("./TrainedModel/BostonHousing.csv")
-        df_X = boston.drop(['mdev'], axis=1)
+        boston = pd.read_csv("./app/TrainedModel/BostonHousing.csv")
+        df_X = boston.drop(['medv'], axis=1)
         df_y = boston['medv']
 
         # Split the data frame
@@ -46,7 +46,7 @@ def hello_world():
         for f in files:
           print(f)
         np_arr = floatsome_to_np_array(text).reshape(1, -1)
-        pkl_filename="./TrainedModel/StackedPickle.pkl" # remove app/ from the path if you are running this locally.
+        pkl_filename="./app/TrainedModel/StackedPickle.pkl" # remove app/ from the path if you are running this locally.
         with open(pkl_filename, 'rb') as file:
             pickle_model = pickle.load(file)
         plot_graphs(model=pickle_model,new_input_arr=np_arr,output_file= path)
@@ -54,7 +54,7 @@ def hello_world():
 
 
 def plot_graphs(model,new_input_arr, output_file):
-    boston = pd.read_csv("./TrainedModel/BostonHousing.csv")
+    boston = pd.read_csv("./app/TrainedModel/BostonHousing.csv")
 
     fig = make_subplots(
     rows=1, cols=2
