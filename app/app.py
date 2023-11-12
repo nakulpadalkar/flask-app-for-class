@@ -6,6 +6,7 @@ from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import uuid
 import os
+import secrets
 from dotenv import load_dotenv
 
 # Assuming your .env file is in the 'app' directory, relative to this script
@@ -13,48 +14,46 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '/', '.env')
 load_dotenv(dotenv_path)
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY')
+# app.secret_key = os.environ.get('SECRET_KEY')
+app.secret_key = secrets.token_hex(16)
 
 @app.route("/", methods=['GET', 'POST'])
 def hello_world():
+    prediction_text = None  # Initialize the variable to store prediction text
     if request.method == 'GET':
-        # Render the main page
-        return render_template("index.html", href="static/baseimage.svg")
+        return render_template("index.html", href="baseimage.svg")
     else:
         try:
             text = request.form['text']
             random_string = uuid.uuid4().hex
             path = f"./static/{random_string}.svg"
 
-            # Load the model from the joblib file
-            model = joblib.load("./app/TrainedModel/stacked-model.joblib")
+            # Load the model and prepare input data...
+            model = joblib.load("./app/TrainedModel/stacked-models.joblib")
+            np_arr = floatsome_to_np_array(text)
 
-            # Prepare input data
-            np_arr = floatsome_to_np_array(text)  # Ensure this function returns the correct shape (1, 13)
-
-            # Check if the input data has the correct shape (1, 13)
+            # Check if the input data has the correct shape (1, 13)...
             if np_arr.shape == (1, 13):
-                # Create a DataFrame with the same feature names as the training data
                 feature_names = ['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'b', 'lstat']
                 input_df = pd.DataFrame(np_arr, columns=feature_names)
-
-                # Make a prediction
                 prediction = model.predict(input_df)
 
-                # Plot graphs (assuming the plot_graphs function uses the prediction)
+                # Convert prediction to text and format it to display
+                prediction_text = f"The predicted value is: {prediction[0]:.2f}"
+
+                # Generate plot...
                 plot_graphs(model, np_arr, path)
 
-                # Render the template with the prediction result
-                return render_template("index.html", href=path[2:], prediction=str(prediction))
             else:
-                # If input data is not the correct shape, flash an error message
                 flash('Input data is not in the correct format. Please enter 13 comma-separated values.', 'danger')
                 return redirect(url_for('hello_world'))
 
         except Exception as e:
-            # For any other exceptions, flash an error message
             flash(str(e), 'danger')
             return redirect(url_for('hello_world'))
+
+    # Render the template with or without the prediction result
+    return render_template("index.html", href=path, prediction_text=prediction_text)
 
 
 def plot_graphs(model, new_input_arr, output_file):
@@ -116,26 +115,6 @@ def floatsome_to_np_array(floats_str):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
-
-
-
-# example comment made by me
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # def hello_world():

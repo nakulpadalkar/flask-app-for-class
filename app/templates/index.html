@@ -18,7 +18,7 @@
     <div class="container">
         <div class="text-center">
             <h1>Boston Housing Value Prediction</h1>
-            <img src="{{ href }}" class="img-fluid" alt="Base Image"/> <!-- Adjust as needed -->
+            <img src="{{ url_for('static', filename=href) }}" class="img-fluid" alt="Prediction Graph"/>
         </div>
         <form method="POST" class="mt-4">
             <div class="form-group">
@@ -27,11 +27,116 @@
             </div>
             <button type="submit" class="btn btn-primary">Predict</button>
         </form>
-
+        {% if prediction_text %}
+        <div class="prediction-result mt-3">
+            <strong>{{ prediction_text }}</strong>
+        </div>
+        {% endif %}
         <h2 class="mt-5">Variable Descriptions for Boston Housing Dataset</h2>
         <div class="table-responsive">
             <table class="table table-bordered">
-                <!-- Your table content -->
+                <thead>
+                    <tr>
+                        <th class="tg-fymr">Variable Name</th>
+                        <th class="tg-fymr">Variable Description</th>
+                        <th class="tg-fymr">Variable Type</th>
+                        <th class="tg-fymr">Variable Range</th>
+                        <th class="tg-fymr">Example Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th class="tg-fymr">CRIM</th>
+                        <th class="tg-f8tv">per capita crime rate by town</th>
+                        <th class="tg-0pky">Continuous</th>
+                        <th class="tg-0pky">0.006320</th>
+                        <th class="tg-0pky">88.976200</th>
+                    </tr>
+                    <tr>
+                        <td class="tg-if4e">ZN</td>
+                        <td class="tg-txu4">proportion of residential land zoned for lots over 25,000 sq.ft.</td>
+                        <td class="tg-btxf">Continuous</td>
+                        <td class="tg-btxf"></td>
+                        <td class="tg-btxf"></td>
+                    </tr>
+                    <tr>
+                        <td class="tg-fymr">INDUS</td>
+                        <td class="tg-f8tv">proportion of non-retail business acres per town</td>
+                        <td class="tg-0pky">Continuous</td>
+                        <td class="tg-0pky"></td>
+                        <td class="tg-0pky"></td>
+                    </tr>
+                    <tr>
+                        <td class="tg-if4e">CHAS</td>
+                        <td class="tg-txu4">Charles River dummy variable (= 1 if tract bounds river; 0 otherwise)</td>
+                        <td class="tg-btxf">Binary</td>
+                        <td class="tg-btxf"></td>
+                        <td class="tg-btxf"></td>
+                    </tr>
+                    <tr>
+                        <td class="tg-fymr">NOX</td>
+                        <td class="tg-f8tv">nitric oxides concentration (parts per 10 million)</td>
+                        <td class="tg-0pky">Continuous</td>
+                        <td class="tg-0pky"></td>
+                        <td class="tg-0pky"></td>
+                    </tr>
+                    <tr>
+                        <td class="tg-if4e">RM</td>
+                        <td class="tg-txu4">average number of rooms per dwelling</td>
+                        <td class="tg-btxf">Continuous</td>
+                        <td class="tg-btxf"></td>
+                        <td class="tg-btxf"></td>
+                    </tr>
+                    <tr>
+                        <td class="tg-1wig">AGE</td>
+                        <td class="tg-8zwo">proportion of owner-occupied units built prior to 1940</td>
+                        <td class="tg-0lax">Continuous</td>
+                        <td class="tg-0lax"></td>
+                        <td class="tg-0lax"></td>
+                    </tr>
+                    <tr>
+                        <td class="tg-797t">DIS</td>
+                        <td class="tg-3o7t">weighted distances to five Boston employment centres</td>
+                        <td class="tg-buh4">Continuous</td>
+                        <td class="tg-buh4"></td>
+                        <td class="tg-buh4"></td>
+                    </tr>
+                    <tr>
+                        <td class="tg-1wig">RAD</td>
+                        <td class="tg-8zwo">index of accessibility to radial highways</td>
+                        <td class="tg-0lax">Continuous</td>
+                        <td class="tg-0lax"></td>
+                        <td class="tg-0lax"></td>
+                    </tr>
+                    <tr>
+                        <td class="tg-797t">TAX</td>
+                        <td class="tg-3o7t">full-value property-tax rate per $10,000</td>
+                        <td class="tg-buh4">Continuous</td>
+                        <td class="tg-buh4"></td>
+                        <td class="tg-buh4"></td>
+                    </tr>
+                    <tr>
+                        <td class="tg-1wig">PTRATIO</td>
+                        <td class="tg-8zwo">pupil-teacher ratio by town</td>
+                        <td class="tg-0lax">Continuous</td>
+                        <td class="tg-0lax">12.60 - 22.00</td>
+                        <td class="tg-0lax">3.685</td>
+                    </tr>
+                    <tr>
+                        <td class="tg-797t">B</td>
+                        <td class="tg-3o7t">1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town</td>
+                        <td class="tg-0lax">Continuous</td>
+                        <td class="tg-0lax">0.32 - 396.90</td>
+                        <td class="tg-0lax">123.5</td>
+                    </tr>
+                    <tr>
+                        <td class="tg-1wig">LSTAT</td>
+                        <td class="tg-0lax">% lower status of the population</td>
+                        <td class="tg-buh4">Continuous</td>
+                        <td class="tg-buh4">1.73 - 37.97</td>
+                        <td class="tg-buh4">16.36</td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
