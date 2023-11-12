@@ -39,7 +39,7 @@ def hello_world():
         df_y = boston['medv']
 
         # Split the data frame
-        X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.25)
+        X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.15)
         
         # Load the model with details
         files = [f for f in os.listdir('.') if os.path.isfile(f)]
