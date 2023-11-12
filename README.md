@@ -69,6 +69,27 @@ This creates a copy of the repository in your GitHub account.
     ```
 3. Open your web browser and go to `http://127.0.0.1:5000/` to view the app.
 
+## Upgrading heroku build stack from 20 to 22
+
+Setting Heroku stack. In this case to heroku-20 equivalent with Ubuntu 20.04
+
+  ```
+  heroku stack:set heroku-20
+  ```
+Since you are using a different stack, the old cache may not be compatible. Clearing cache:
+  ```
+  heroku plugins:install heroku-builds
+  heroku builds:cache:purge -a appname
+  ```
+Triggering a rebuild:
+
+  ```
+  git commit --allow-empty -m "Purge cache"
+  git push heroku master
+  ```
+
+You have to make sure that the buildpack you are using is compatible with heroku-22. If it is not, it will not work. You will have to wait for the maintainer to update, use a different buildpack or fix the buildpack yourself and use that. Following this step by step is similar to deploying an entirely fresh app.
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
