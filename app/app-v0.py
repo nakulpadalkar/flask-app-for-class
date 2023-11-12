@@ -8,7 +8,6 @@ import uuid
 import os
 import secrets
 from dotenv import load_dotenv
-import time
 
 # Assuming your .env file is in the 'app' directory, relative to this script
 dotenv_path = os.path.join(os.path.dirname(__file__), '/', '.env')
@@ -18,27 +17,23 @@ app = Flask(__name__)
 # app.secret_key = os.environ.get('SECRET_KEY')
 app.secret_key = secrets.token_hex(16)
 
-
 @app.route("/", methods=['GET', 'POST'])
 def hello_world():
     prediction_text = None  # Initialize the variable to store prediction text
     if request.method == 'GET':
-        print("GET request received")
         return render_template("index.html", href="baseimage.svg")
     else:
         try:
             text = request.form['text']
             random_string = uuid.uuid4().hex
             path = f"./static/{random_string}.svg"
-            print(f"Received POST request with input data: {text}")
 
             # Load the model and prepare input data...
-            model = joblib.load("./app/TrainedModel/stacked_models.joblib")
+            model = joblib.load("./app/TrainedModel/stacked-models.joblib")
             np_arr = floatsome_to_np_array(text)
 
             # Check if the input data has the correct shape (1, 13)...
             if np_arr.shape == (1, 13):
-                print("Input data is in the correct format")
                 feature_names = ['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'b', 'lstat']
                 input_df = pd.DataFrame(np_arr, columns=feature_names)
                 prediction = model.predict(input_df)
@@ -48,30 +43,18 @@ def hello_world():
 
                 # Generate plot...
                 plot_graphs(model, np_arr, path)
-                print("Plot generated")
 
             else:
                 flash('Input data is not in the correct format. Please enter 13 comma-separated values.', 'danger')
-                return redirect(url_for('error_page'))
+                return redirect(url_for('hello_world'))
 
         except Exception as e:
             flash(str(e), 'danger')
-            print(f"Error: {str(e)}")
-            return redirect(url_for('error_page'))
+            return redirect(url_for('hello_world'))
 
-    # Append a timestamp to the image URL to prevent caching
-    timestamp = int(time.time())  # Get the current timestamp
-    print(f"Timestamp: {timestamp}")
-    return render_template("index.html", href=f"{path}?t={timestamp}", prediction_text=prediction_text)
+    # Render the template with or without the prediction result
+    return render_template("index.html", href=path, prediction_text=prediction_text)
 
-
-@app.route("/error")
-def error_page():
-    return render_template("error.html")
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
 
 def plot_graphs(model, new_input_arr, output_file):
     boston = pd.read_csv("./app/TrainedModel/BostonHousing.csv")
