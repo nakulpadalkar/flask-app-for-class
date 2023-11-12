@@ -15,6 +15,38 @@
                 <label for="text">Enter 13 comma-separated values:</label>
                 <input type="text" class="form-control" name="text" id="text" required>
             </div>
+
+            <!-- Radio buttons for model selection -->
+            <div class="form-group">
+                <label>Choose a Model:</label>
+                <div class="row">
+                    <div class="col-3">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="model" value="lr"> Linear Regression
+                        </label>
+                    </div>
+                    <div class="col-3">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="model" value="Ridge"> Ridge
+                        </label>
+                    </div>
+                    <div class="col-3">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="model" value="Lasso"> Lasso
+                        </label>
+                    </div>
+                    <div class="col-3">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="model" value="Tree"> Decision Tree
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Repeat the above 4x4 grid for other models -->
+                <!-- For simplicity, I've shown just four models here -->
+
+            </div>
+            
             <button type="submit" class="btn btn-primary">Predict</button>
         </form>
         <div class="mt-4">
