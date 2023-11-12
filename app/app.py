@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import numpy as np
 import pandas as pd
 import joblib
@@ -74,6 +74,51 @@ def floatsome_to_np_array(floats_str):
     if len(floats) != 13:
         raise ValueError("Expected 13 comma-separated values.")
     return floats.reshape(1, 13)
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
+@app.route("/api/predict", methods=['POST'])
+def api_predict():
+    try:
+        text = request.form['text']
+        selected_model = request.form.get('model')
+
+        # Load the selected model...
+        model_path = f"./app/TrainedModel/{selected_model}_model.joblib"
+        model = joblib.load(model_path)
+
+        np_arr = floatsome_to_np_array(text)
+
+        # Check if the input data has the correct shape (1, 13)...
+        if np_arr.shape == (1, 13):
+            feature_names = ['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'b', 'lstat']
+            input_df = pd.DataFrame(np_arr, columns=feature_names)
+            prediction = model.predict(input_df)
+
+            # Convert prediction to text
+            prediction_text = f"The predicted value is: {prediction[0]:.2f}"
+
+            # Return prediction as JSON response
+            response_data = {
+                "model_used": selected_model,
+                "input_data": input_df.to_dict(orient='records')[0],
+                "prediction": prediction_text
+            }
+            return jsonify(response_data)
+
+        else:
+            response_data = {
+                "error": "Input data is not in the correct format. Please enter 13 comma-separated values."
+            }
+            return jsonify(response_data), 400
+
+    except Exception as e:
+        response_data = {
+            "error": str(e)
+        }
+        return jsonify(response_data), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
