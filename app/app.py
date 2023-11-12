@@ -15,7 +15,6 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '/', '.env')
 load_dotenv(dotenv_path)
 
 app = Flask(__name__)
-# app.secret_key = os.environ.get('SECRET_KEY')
 app.secret_key = secrets.token_hex(16)
 
 
@@ -23,14 +22,12 @@ app.secret_key = secrets.token_hex(16)
 def hello_world():
     prediction_text = None  # Initialize the variable to store prediction text
     if request.method == 'GET':
-        print("GET request received")
         return render_template("index.html", href="baseimage.svg")
     else:
         try:
             text = request.form['text']
             random_string = uuid.uuid4().hex
             path = f"./static/{random_string}.svg"
-            print(f"Received POST request with input data: {text}")
 
             # Load the model and prepare input data...
             model = joblib.load("./app/TrainedModel/stacked_models.joblib")
@@ -38,7 +35,6 @@ def hello_world():
 
             # Check if the input data has the correct shape (1, 13)...
             if np_arr.shape == (1, 13):
-                print("Input data is in the correct format")
                 feature_names = ['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'b', 'lstat']
                 input_df = pd.DataFrame(np_arr, columns=feature_names)
                 prediction = model.predict(input_df)
@@ -48,7 +44,6 @@ def hello_world():
 
                 # Generate plot...
                 plot_graphs(model, np_arr, path)
-                print("Plot generated")
 
             else:
                 flash('Input data is not in the correct format. Please enter 13 comma-separated values.', 'danger')
@@ -56,12 +51,10 @@ def hello_world():
 
         except Exception as e:
             flash(str(e), 'danger')
-            print(f"Error: {str(e)}")
             return redirect(url_for('error_page'))
 
     # Append a timestamp to the image URL to prevent caching
     timestamp = int(time.time())  # Get the current timestamp
-    print(f"Timestamp: {timestamp}")
     return render_template("index.html", href=f"{path}?t={timestamp}", prediction_text=prediction_text)
 
 
@@ -69,9 +62,6 @@ def hello_world():
 def error_page():
     return render_template("error.html")
 
-
-if __name__ == "__main__":
-    app.run(debug=True)
 
 def plot_graphs(model, new_input_arr, output_file):
     boston = pd.read_csv("./app/TrainedModel/BostonHousing.csv")
@@ -123,6 +113,7 @@ def plot_graphs(model, new_input_arr, output_file):
     # Save and show the figure
     fig.write_image(output_file, width=1200, engine="kaleido")
 
+
 def floatsome_to_np_array(floats_str):
     floats = np.array([float(x) for x in floats_str.split(',') if x.strip()], dtype=np.float32)
     if len(floats) != 13:
@@ -132,45 +123,3 @@ def floatsome_to_np_array(floats_str):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-# def hello_world():
-#     request_type_str = request.method
-#     if request_type_str == 'GET':
-#         return render_template('index.html', href='static/base_pic.svg')
-#     else:
-#         text = request.form['text']
-        # random_string = uuid.uuid4().hex
-        # path = "static/" + random_string + ".svg"
-        # model = load('model.joblib')
-        # np_arr = floats_string_to_np_arr(text)
-        # make_picture('AgesAndHeights.pkl', model, np_arr, path)
-    # return render_template("index.html",href=path)
-
-# This is the first and second step
-# def hello_world():
-#     return "<p>Hello, World</p>" # First Step
-#     # return render_template('index.html', href='static/baseimage.svg') # Comment first step and then uncomment this
-
-# def hello_world():
-#     request_type_str = request.method
-#     if request_type_str == 'GET':
-#         return render_template('index.html', href='static/base_pic.svg')
-#     else:
-#         text = request.form['text']
-        # random_string = uuid.uuid4().hex
-        # path = "static/" + random_string + ".svg"
-        # model = load('model.joblib')
-        # np_arr = floats_string_to_np_arr(text)
-        # make_picture('AgesAndHeights.pkl', model, np_arr, path)
-    # return render_template("index.html",href=path)
-
-    # boston = load_boston()
-    # pkl_filename = "TrainedModel/StackedPickle.pkl"
-    # testvalue = boston.data[1].reshape(1, -1)
-    # test_input = testvalue
-    # with open(pkl_filename, 'rb') as file:
-    #     pickle_model = pickle.load(file)
-    # predict = pickle_model.predict(test_input)
-    # predict_as_str = str(predict)
-    # return predict_as_str
