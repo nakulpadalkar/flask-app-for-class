@@ -20,8 +20,9 @@ available_models = ['lr', 'Ridge', 'Lasso', 'Tree', 'Random Forest', 'Bagging', 
 
 @app.route("/", methods=['GET', 'POST'])
 def hello_world():
-    prediction_text = None  # Initialize the variable to store prediction text
-    input_data = None  # Initialize the variable to store input data
+    prediction_text = None
+    input_data = None
+    selected_model = None  # Initialize the selected_model variable
 
     if request.method == 'GET':
         print("GET request received")
@@ -29,7 +30,7 @@ def hello_world():
     else:
         try:
             text = request.form['text']
-            selected_model = request.form.get('model')
+            selected_model = request.form.get('model')  # Get the selected model name
             random_string = uuid.uuid4().hex
 
             print(f"Received POST request with input data: {text}")
@@ -62,7 +63,7 @@ def hello_world():
             print(f"Error: {str(e)}")
             return redirect(url_for('error_page'))
 
-    return render_template("index.html", prediction_text=prediction_text, input_data=input_data)
+    return render_template("index.html", prediction_text=prediction_text, input_data=input_data, selected_model=selected_model)
 
 @app.route("/error")
 def error_page():
