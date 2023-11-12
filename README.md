@@ -22,13 +22,28 @@ This creates a copy of the repository in your GitHub account.
 ### Setting Up Your Local Environment
 
 1. Clone your forked repository to your local machine:
-
-`git clone https://github.com/nakulpadalkar/flask-app-for-class.git`
-
+    ```
+    git clone https://github.com/nakulpadalkar/flask-app-for-class.git
+    ```
 2. Navigate to the cloned directory:
-`cd flask-app-for-class`
-
+    ```
+    cd flask-app-for-class
+    ```
 3. Create a virtual environment:
+    ```
+    python3 -m venv venv
+    ```
+4. Activate the virtual environment:
 
-`python3 -m venv venv`
+- On Windows:
+  ```
+  .\venv\Scripts\activate
+  ```
+- On macOS and Linux:
+  ```
+  source venv/bin/activate
+  ```
+5. Install the required packages:
+
+
 
