@@ -86,7 +86,7 @@ def api_predict():
         selected_model = request.form.get('model')
 
         # Load the selected model...
-        model_path = f"./app/TrainedModel/{selected_model}_model.joblib"
+        model_path = f"./TrainedModel/{selected_model}_model.joblib"
         model = joblib.load(model_path)
 
         np_arr = floatsome_to_np_array(text)
