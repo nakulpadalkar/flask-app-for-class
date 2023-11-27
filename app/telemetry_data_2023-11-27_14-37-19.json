@@ -1,0 +1,5 @@
+{
+    "input_data": "0.03237,0,2.18,0,0.458,6.998,45.8,6.0622,3,222,18.7,394.63,2.94",
+    "selected_model": "Ridge",
+    "prediction": "The predicted value is: 29.07"
+}
