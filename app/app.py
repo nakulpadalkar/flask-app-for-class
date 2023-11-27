@@ -125,3 +125,44 @@ def save_telemetry_to_db(text, selected_model, prediction_text):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+# Define a new route for prediction API
+@app.route("/api/predict", methods=['POST'])
+def predict_api():
+    try:
+        # Get JSON data from the request
+        data = request.get_json()
+        input_data = data.get('input_data')
+        selected_model = data.get('selected_model')
+
+        # Load the selected model...
+        model_path = f"./TrainedModel/{selected_model}_model.joblib"
+        model = joblib.load(model_path)
+
+        np_arr = floatsome_to_np_array(input_data)
+
+        # Check if the input data has the correct shape (1, 13)...
+        if np_arr.shape == (1, 13):
+            feature_names = ['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'b', 'lstat']
+            input_df = pd.DataFrame(np_arr, columns=feature_names)
+
+            prediction = model.predict(input_df)
+
+            # Convert prediction to text and format it to display
+            prediction_text = f"The predicted value is: {prediction[0]:.2f}"
+
+            # Collect telemetry data
+            collect_telemetry_data(input_data, selected_model, prediction_text)
+
+            # Save telemetry data to the database
+            save_telemetry_to_db(input_data, selected_model, prediction_text)
+
+            # Return prediction result as JSON
+            return jsonify({'prediction': prediction_text})
+
+        else:
+            return jsonify({'error': 'Input data is not in the correct format. Please enter 13 comma-separated values.'}), 400
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
