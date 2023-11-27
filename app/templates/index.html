@@ -6,9 +6,21 @@
     <title>Model Prediction</title>
     <!-- Add Bootstrap CSS link -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom CSS for narrow content with a relief box */
+        .narrow-content {
+            max-width: 600px; /* Adjust the width as needed */
+            margin: 0 auto;
+            padding: 20px;
+            background: url('./images/shadow.jpg') center/cover; /* Replace 'shadow.jpg' with your image path */
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container mt-5 narrow-content"> <!-- Add 'narrow-content' class to your container -->
         <h1 class="mb-4">Model Prediction</h1>
         <form method="POST">
             <div class="form-group">
