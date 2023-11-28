@@ -55,7 +55,7 @@ def hello_world():
             print(f"Received POST request with input data: {text}")
 
             # Load the selected model...
-            model_path = f"./TrainedModel/{selected_model}_model.joblib"
+            model_path = f"./app/TrainedModel/{selected_model}_model.joblib"
             model = joblib.load(model_path)
 
             np_arr = floatsome_to_np_array(text)
@@ -137,7 +137,7 @@ def predict_api():
         selected_model = data.get('selected_model')
 
         # Load the selected model...
-        model_path = f"./TrainedModel/{selected_model}_model.joblib"
+        model_path = f"./app/TrainedModel/{selected_model}_model.joblib"
         model = joblib.load(model_path)
 
         np_arr = floatsome_to_np_array(input_data)
