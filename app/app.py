@@ -128,6 +128,12 @@ def save_telemetry_to_db(text, selected_model, prediction_text):
 if __name__ == "__main__":
     app.run(debug=True)
 
+@app.route("/history")
+def history():
+    # Fetch all records from the TelemetryData table
+    history_data = TelemetryData.query.all()
+    return render_template("history.html", history_data=history_data)
+
 
 # Define a new route for prediction API
 @app.route("/api/predict", methods=['POST'])
