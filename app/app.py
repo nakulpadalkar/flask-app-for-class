@@ -130,10 +130,18 @@ if __name__ == "__main__":
 
 @app.route("/history")
 def history():
-    # Fetch all records from the TelemetryData table
-    history_data = TelemetryData.query.all()
-    return render_template("history.html", history_data=history_data)
+    try:
+        telemetry_records = TelemetryData.query.all()
+        return render_template("history.html", telemetry_records=telemetry_records)
+    except Exception as e:
+        print("Error fetching telemetry data:", e)
+        # Handle the error appropriately, maybe display an error message on the page
 
+@app.route("/telemetry")
+def telemetry():
+    # Fetch telemetry data from the database
+    telemetry_records = TelemetryData.query.order_by(TelemetryData.timestamp.desc()).all()
+    return render_template("telemetry.html", telemetry_records=telemetry_records)
 
 # Define a new route for prediction API
 @app.route("/api/predict", methods=['POST'])

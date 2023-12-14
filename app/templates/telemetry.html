@@ -42,33 +42,23 @@
                 </li>
             </ul>
         </div>
-    </nav>    
-    <!-- History Content Section -->
+    </nav>
+    <!-- Telemetry Content Section -->
     <div class="container mt-5">
-        <h1 class="mb-4">Prediction History</h1>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col">Timestamp</th>
-                    <th scope="col">Input Data</th>
-                    <th scope="col">Selected Model</th>
-                    <th scope="col">Prediction</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in telemetry_records %}
-                <tr>
-                    <td>{{ record.timestamp }}</td>
-                    <td>{{ record.input_data }}</td>
-                    <td>{{ record.selected_model }}</td>
-                    <td>{{ record.prediction_text }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <h1 class="mb-4">Telemetry Data</h1>
+        <ul>
+            {% for record in telemetry_records %}
+            <li>
+                <strong>Timestamp:</strong> {{ record.timestamp }}<br>
+                <strong>Input Data:</strong> {{ record.input_data }}<br>
+                <strong>Selected Model:</strong> {{ record.selected_model }}<br>
+                <strong>Prediction:</strong> {{ record.prediction_text}}
+            </li>
+            <br>
+            {% endfor %}
+        </ul>
     </div>
 
-    <!-- Bootstrap JS and Popper.js scripts (same as your main page) -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
