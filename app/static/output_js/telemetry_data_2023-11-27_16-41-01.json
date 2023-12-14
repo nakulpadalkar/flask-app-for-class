@@ -1,0 +1,5 @@
+{
+    "input_data": "1.05393, 0, 8.14, 0, 0.538, 5.935, 29.3, 4.4986, 4, 307, 21, 386.85, 6.58",
+    "selected_model": "Tree",
+    "prediction_text": "The predicted value is: 23.10"
+}
