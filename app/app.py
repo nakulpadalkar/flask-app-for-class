@@ -20,6 +20,8 @@ app.secret_key = secrets.token_hex()
 
 # Configure your MySQL database URI here
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:Georgetown1!@localhost/telemetry'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:Georgetown1!@localhost/telemetry'
+
 
 # Initialize the SQLAlchemy database
 db = SQLAlchemy(app)
