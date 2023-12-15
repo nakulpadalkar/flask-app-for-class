@@ -45,7 +45,7 @@
     </nav>
 
     <!-- Content Section -->
-    <div class="container mt-5 narrow-content">
+    <div class="container mt-5 narrow-content"> <!-- Add 'narrow-content' class to your container -->
         <h1 class="mb-4">Model Prediction</h1>
         <!-- Prediction Form -->
         <form method="POST">
@@ -69,7 +69,7 @@
             <button type="submit" class="btn btn-primary">Predict</button>
         </form>
 
-        <!-- Result Display -->
+        <!-- Result and Telemetry Data Display -->
         <div class="mt-4">
             {% if input_data %}
                 <h2>Input Data:</h2>
@@ -84,9 +84,23 @@
                 <h2>Prediction ({{ selected_model }} Model):</h2>
                 <p class="alert alert-success">{{ prediction_text }}</p>
             {% endif %}
+            
+            <!-- Display Telemetry Data -->
+            <h2>Telemetry Data:</h2>
+            <ul>
+                {% for timestamp, telemetry in telemetry_data.items() %}
+                <li>
+                    <strong>Timestamp:</strong> {{ timestamp }}<br>
+                    <strong>Input Data:</strong> {{ telemetry.input_data }}<br>
+                    <strong>Selected Model:</strong> {{ telemetry.selected_model }}<br>
+                    <strong>Prediction:</strong> {{ telemetry.prediction_text}}
+                </li>
+                <br>
+                {% endfor %}
+            </ul>
         </div>
     </div>
-    <!-- Bootstrap JS and Popper.js scripts -->
+    <!-- Add Bootstrap JS and Popper.js scripts (for dropdowns and other features) -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

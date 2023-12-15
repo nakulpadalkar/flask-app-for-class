@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Model Prediction</title>
+        <!-- Add Bootstrap CSS link -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <style>
+            /* Custom CSS for narrow content with a relief box */
+            .narrow-content {
+                max-width: 800px; /* Adjust the width as needed */
+                margin: 0 auto;
+                padding: 20px;
+                background: url('./app/templates/images/shadow.jpg') center/cover; /* Replace 'shadow.jpg' with your image path */
+                border: 2px solid #ccc;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            }
+        </style>
+    </head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Model Prediction</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/history">History</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/telemetry">Telemetry</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">About</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- Telemetry Content Section -->
+    <div class="container mt-5">
+        <h1 class="mb-4">Telemetry Data</h1>
+        <ul>
+            {% for record in telemetry_records %}
+            <li>
+                <strong>Timestamp:</strong> {{ record.timestamp }}<br>
+                <strong>Input Data:</strong> {{ record.input_data }}<br>
+                <strong>Selected Model:</strong> {{ record.selected_model }}<br>
+                <strong>Prediction:</strong> {{ record.prediction_text}}
+            </li>
+            <br>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

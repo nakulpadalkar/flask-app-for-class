@@ -1,0 +1,5 @@
+{
+    "input_data": "0.63796,\t0,\t8.14,\t0,\t0.538,\t6.096,\t84.5,\t4.4619,\t4,\t307,\t21,\t380.02,\t10.26",
+    "selected_model": "lr",
+    "prediction_text": "The predicted value is: 19.35"
+}
