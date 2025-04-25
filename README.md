@@ -9,6 +9,7 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 
 Before you begin, ensure you have the following installed:
+
 - Python 3.10
 - pip (Python package manager)
 
@@ -22,17 +23,17 @@ This creates a copy of the repository in your GitHub account.
 ### Setting Up Your Local Environment
 
 1. Clone your forked repository to your local machine:
-    ```
-    git clone https://github.com/nakulpadalkar/flask-app-for-class.git
-    ```
+   ```
+   git clone https://github.com/nakulpadalkar/flask-app-for-class.git
+   ```
 2. Navigate to the cloned directory:
-    ```
-    cd flask-app-for-class
-    ```
+   ```
+   cd flask-app-for-class
+   ```
 3. Create a virtual environment:
-    ```
-    python3 -m venv venv
-    ```
+   ```
+   python3 -m venv .venv
+   ```
 4. Activate the virtual environment:
 
 - On Windows:
@@ -43,9 +44,8 @@ This creates a copy of the repository in your GitHub account.
   ```
   source venv/bin/activate
   ```
+
 5. Install the required packages:
-
-
 
 ### Running the Flask App
 
@@ -56,37 +56,40 @@ This creates a copy of the repository in your GitHub account.
   ```
   set FLASK_APP=app.py
   ```
-
 - On macOS and Linux:
 
   ```
   export FLASK_APP=app.py
   ```
+
 2. Run the Flask application:
 
-    ```
-    flask run
-    ```
+   ```
+   flask run
+   ```
 3. Open your web browser and go to `http://127.0.0.1:5000/` to view the app.
 
 ## Upgrading heroku build stack from 20 to 22
 
 Setting Heroku stack. In this case to heroku-20 equivalent with Ubuntu 20.04
 
-  ```
+```
   heroku stack:set heroku-20
-  ```
+```
+
 Since you are using a different stack, the old cache may not be compatible. Clearing cache:
-  ```
+
+```
   heroku plugins:install heroku-builds
   heroku builds:cache:purge -a appname
-  ```
+```
+
 Triggering a rebuild:
 
-  ```
+```
   git commit --allow-empty -m "Purge cache"
   git push heroku master
-  ```
+```
 
 You have to make sure that the buildpack you are using is compatible with heroku-22. If it is not, it will not work. You will have to wait for the maintainer to update, use a different buildpack or fix the buildpack yourself and use that. Following this step by step is similar to deploying an entirely fresh app.
 
@@ -99,6 +102,3 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Acknowledgments
-
-
-
