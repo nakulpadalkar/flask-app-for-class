@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,700&display=swap');
+
+:root {
+  --bg-1: #fff4ec;
+  --bg-2: #ffe0e9;
+  --ink: #1b1b25;
+  --panel: rgba(255, 255, 255, 0.82);
+  --accent: #ff7a59;
+  --muted: #5f6b7a;
+  --shadow: 0 14px 34px rgba(23, 16, 41, 0.12);
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(900px 500px at 80% -20%, rgba(185, 65, 157, 0.26), transparent 60%),
+    radial-gradient(700px 350px at -10% 15%, rgba(255, 122, 89, 0.28), transparent 58%),
+    linear-gradient(130deg, var(--bg-1), var(--bg-2));
+}
+
+.page {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 22px;
+}
+
+.hero {
+  margin: 6px 0 18px;
+  padding: 18px 22px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.title {
+  margin: 0;
+  font-size: 2.05rem;
+  font-family: 'Fraunces', serif;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.summary-card {
+  background: var(--panel);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.summary-label {
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.summary-value {
+  margin-top: 6px;
+  font-size: 1.26rem;
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+.two-col {
+  grid-template-columns: 1fr;
+}
+
+.panel {
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.panel-title {
+  margin: 4px 0 12px;
+  font-size: 1.08rem;
+}
+
+.panel-note {
+  margin-top: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.controls {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+  margin-bottom: 8px;
+}
+
+.control-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+@media (min-width: 900px) {
+  .two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .controls {
+    grid-template-columns: 1fr 1fr;
+  }
+}
