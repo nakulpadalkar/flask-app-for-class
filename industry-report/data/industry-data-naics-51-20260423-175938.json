@@ -1,0 +1,11 @@
+{
+  "code_type": "naics",
+  "code": "51",
+  "industry_name": "Information",
+  "fred_series": {
+    "id": null,
+    "title": null
+  },
+  "summary_markdown_file": "naics-51-20260423-175938.md",
+  "observations": []
+}

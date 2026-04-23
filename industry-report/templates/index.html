@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Industry Report Generator</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+      :root {
+        --bg: #f3f6f9;
+        --card: #ffffff;
+        --ink: #0f172a;
+        --muted: #475569;
+        --primary: #0f766e;
+        --primary-dark: #115e59;
+        --border: #dbe5ef;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: radial-gradient(circle at top right, #d7efe8 0%, #f3f6f9 55%);
+        color: var(--ink);
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 2rem auto;
+        padding: 0 1rem 2rem;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.25rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      }
+
+      h1 {
+        margin-top: 0;
+        margin-bottom: 0.4rem;
+      }
+
+      p.subtitle {
+        margin-top: 0;
+        color: var(--muted);
+      }
+
+      form {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr 2fr auto;
+        align-items: end;
+      }
+
+      label {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      select, button {
+        width: 100%;
+        padding: 0.65rem 0.7rem;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        font-size: 0.95rem;
+      }
+
+      button {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: var(--primary-dark);
+      }
+
+      .error {
+        margin-top: 1rem;
+        padding: 0.8rem;
+        border-radius: 8px;
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .warning {
+        margin-top: 1rem;
+        padding: 0.8rem;
+        border-radius: 8px;
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .result {
+        margin-top: 1.25rem;
+      }
+
+      .meta {
+        color: var(--muted);
+        margin-bottom: 0.6rem;
+      }
+
+      .summary {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        background: #fbfdff;
+      }
+
+      .plot {
+        margin-top: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.5rem;
+        background: #fff;
+      }
+
+      a.file-link {
+        display: inline-block;
+        margin-right: 1rem;
+        color: var(--primary-dark);
+        text-decoration: none;
+      }
+
+      @media (max-width: 900px) {
+        form {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>Industry Report Generator</h1>
+        <p class="subtitle">
+          Pull industry or occupation codes from BLS, fetch unemployment series from FRED,
+          summarize with OpenAI + Hugging Face, and save reports as Markdown.
+        </p>
+
+        <form method="post">
+          <div>
+            <label for="code_type">Code Type</label>
+            <select id="code_type" name="code_type"></select>
+          </div>
+          <div>
+            <label for="code">Industry Code</label>
+            <select id="code" name="code"></select>
+          </div>
+          <div>
+            <button type="submit">Generate Report</button>
+          </div>
+        </form>
+
+        {% if error %}
+          <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if warning %}
+          <div class="warning">{{ warning }}</div>
+        {% endif %}
+
+        {% if summary_html %}
+          <div class="result">
+            <div class="meta">
+              {% if summary_file %}
+                Saved markdown file: <strong>{{ summary_file }}</strong>
+              {% endif %}
+              {% if data_file %}
+                | Saved raw data file: <strong>{{ data_file }}</strong>
+              {% endif %}
+            </div>
+            <div class="summary">{{ summary_html | safe }}</div>
+          </div>
+        {% endif %}
+
+        {% if plot_html %}
+          <div class="plot">{{ plot_html | safe }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      const codesByType = {{ codes_by_type | tojson }};
+      const selectedType = {{ selected_type | tojson }};
+      const selectedCode = {{ selected_code | tojson }};
+
+      const typeSelect = document.getElementById("code_type");
+      const codeSelect = document.getElementById("code");
+
+      function loadTypeOptions() {
+        typeSelect.innerHTML = "";
+        Object.keys(codesByType).forEach((typeKey) => {
+          const option = document.createElement("option");
+          option.value = typeKey;
+          option.textContent = typeKey.toUpperCase();
+          if (typeKey === selectedType) {
+            option.selected = true;
+          }
+          typeSelect.appendChild(option);
+        });
+      }
+
+      function loadCodeOptions(typeKey, initialCode) {
+        codeSelect.innerHTML = "";
+        const options = codesByType[typeKey] || [];
+
+        options.slice(0, 1200).forEach((row) => {
+          const option = document.createElement("option");
+          option.value = row.code;
+          option.textContent = `${row.code} - ${row.name}`;
+          if (row.code === initialCode) {
+            option.selected = true;
+          }
+          codeSelect.appendChild(option);
+        });
+      }
+
+      loadTypeOptions();
+      loadCodeOptions(typeSelect.value || "naics", selectedCode);
+
+      typeSelect.addEventListener("change", (event) => {
+        loadCodeOptions(event.target.value, "");
+      });
+    </script>
+  </body>
+</html>

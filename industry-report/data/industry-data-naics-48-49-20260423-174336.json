@@ -1,0 +1,11 @@
+{
+  "code_type": "naics",
+  "code": "48-49",
+  "industry_name": "Transportation and Warehousing",
+  "fred_series": {
+    "id": null,
+    "title": null
+  },
+  "summary_markdown_file": "naics-48-49-20260423-174336.md",
+  "observations": []
+}

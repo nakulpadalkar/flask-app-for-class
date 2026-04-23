@@ -1,0 +1,11 @@
+{
+  "code_type": "naics",
+  "code": "11",
+  "industry_name": "Agriculture, Forestry, Fishing and Hunting",
+  "fred_series": {
+    "id": null,
+    "title": null
+  },
+  "summary_markdown_file": "naics-11-20260423-180150.md",
+  "observations": []
+}
