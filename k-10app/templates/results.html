@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEC 10-K Download Results</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .success-box {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        .error-box {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        ul {
+            margin: 10px 0 0 0;
+            padding: 0;
+            list-style-type: none;
+        }
+        li {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #c3e6cb;
+        }
+        .info-text {
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: #555;
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .path {
+            font-family: monospace;
+            background: #dee2e6;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #6c757d;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-sizing: border-box;
+        }
+        .btn:hover {
+            background-color: #5a6268;
+        }
+        .btn-small {
+            padding: 5px 10px;
+            background-color: #17a2b8;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-left: 5px;
+        }
+        .btn-small:hover {
+            background-color: #138496;
+        }
+        .btn-analyze {
+            background-color: #28a745;
+        }
+        .btn-analyze:hover {
+            background-color: #218838;
+        }
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Download Results</h1>
+
+    {% if errors %}
+    <div class="error-box">
+        <strong>The following errors occurred:</strong>
+        <ul style="list-style-type: disc; margin-left: 20px;">
+            {% for error in errors %}
+                <li style="border: none; padding: 0; background: transparent; margin-bottom: 5px; display: list-item;">{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if downloaded_files %}
+    <div class="success-box">
+        <strong>Successfully downloaded the following files:</strong>
+        <ul>
+            {% for file in downloaded_files %}
+                <li>
+                    <span>{{ file.filename }}</span>
+                    <div class="actions">
+                        <a href="/wordcloud/{{ file.ticker }}/{{ file.year }}" target="_blank" class="btn-small">Item 1A Word Cloud</a>
+                        <a href="/analyze/{{ file.ticker }}/{{ file.year }}" target="_blank" class="btn-small btn-analyze" onclick="this.innerText='Analyzing...'">Extract Financials & Plot</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div class="info-text">
+        <p>All successful downloads and their extracted text have been saved locally in the following directory:</p>
+        <p class="path">{{ data_dir }}</p>
+    </div>
+    {% else %}
+    <div class="info-text">
+        <p>No files were successfully downloaded.</p>
+    </div>
+    {% endif %}
+
+    <a href="/" class="btn">Go Back</a>
+</div>
+
+</body>
+</html>

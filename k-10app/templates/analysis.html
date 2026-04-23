@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ticker }} {{ year }} Financial Analysis</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        h3 {
+            text-align: center;
+            color: #666;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+        .graph-container {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .graph-container img {
+            max-width: 100%;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .raw-data {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .raw-data pre {
+            margin: 0;
+        }
+        .badge {
+            background-color: #007bff;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>{{ ticker }} Financial Analysis ({{ year }})</h1>
+    <h3>Extracted via <span class="badge">{{ model_used }}</span></h3>
+
+    <div class="raw-data">
+        <strong>Raw Data Extracted from 10-K (Item 8/7):</strong>
+        <pre>{{ financials_data | tojson(indent=2) }}</pre>
+    </div>
+
+    {% if financials_graph %}
+    <div class="graph-container">
+        <h2>Financial Metrics</h2>
+        <img src="data:image/png;base64,{{ financials_graph }}" alt="Financials Graph">
+    </div>
+    {% endif %}
+
+    {% if stock_graph %}
+    <div class="graph-container">
+        <h2>Stock Price History ({{ year }})</h2>
+        <img src="data:image/png;base64,{{ stock_graph }}" alt="Stock Graph">
+    </div>
+    {% else %}
+    <div class="graph-container">
+        <p><em>No stock data available for {{ ticker }} in {{ year }} via Yahoo Finance.</em></p>
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
