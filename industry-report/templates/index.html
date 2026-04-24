@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Industry Report Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <style>
       :root {
@@ -14,11 +20,12 @@
         --primary: #0f766e;
         --primary-dark: #115e59;
         --border: #dbe5ef;
+        --apa-blue: #003366;
       }
 
       body {
         margin: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Merriweather", Georgia, serif;
         background: radial-gradient(circle at top right, #d7efe8 0%, #f3f6f9 55%);
         color: var(--ink);
       }
@@ -37,9 +44,55 @@
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
       }
 
+      .tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin: 1rem 0 1.25rem;
+      }
+
+      .tab-btn {
+        border: 1px solid var(--border);
+        background: #e2e8f0;
+        color: #0f172a;
+        border-radius: 999px;
+        padding: 0.45rem 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .tab-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+      }
+
+      .tab-panel {
+        display: none;
+      }
+
+      .tab-panel.active {
+        display: block;
+      }
+
       h1 {
         margin-top: 0;
         margin-bottom: 0.4rem;
+        color: var(--apa-blue);
+        text-align: center;
+        font-size: 1.95rem;
+        font-weight: 700;
+      }
+
+      h2 {
+        color: var(--apa-blue);
+        font-weight: 700;
+        text-align: left;
+      }
+
+      h3 {
+        color: var(--apa-blue);
+        font-weight: 700;
+        text-align: left;
       }
 
       p.subtitle {
@@ -119,6 +172,60 @@
         background: #fff;
       }
 
+      .section-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        margin-top: 0.9rem;
+        background: #fbfdff;
+      }
+
+      .obs-form {
+        margin-top: 1rem;
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 2fr auto;
+        align-items: end;
+      }
+
+      .obs-table {
+        margin-top: 1rem;
+        max-height: 320px;
+        overflow: auto;
+      }
+
+      .table-wrap {
+        margin-top: 1rem;
+        overflow-x: auto;
+      }
+
+      table.compact {
+        border-collapse: collapse;
+        min-width: 800px;
+        width: 100%;
+      }
+
+      table.compact th,
+      table.compact td {
+        border: 1px solid #dbe5ef;
+        padding: 0.35rem 0.45rem;
+        font-size: 0.82rem;
+        text-align: left;
+      }
+
+      table.compact tr:nth-child(even) {
+        background: #f8fafc;
+      }
+
+      .series-list {
+        max-height: 340px;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.8rem 1rem;
+        background: #fff;
+      }
+
       a.file-link {
         display: inline-block;
         margin-right: 1rem;
@@ -130,6 +237,10 @@
         form {
           grid-template-columns: 1fr;
         }
+
+        .obs-form {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -139,22 +250,267 @@
         <h1>Industry Report Generator</h1>
         <p class="subtitle">
           Pull industry or occupation codes from BLS, fetch unemployment series from FRED,
-          summarize with OpenAI + Hugging Face, and save reports as Markdown.
+          summarize with OpenAI + Hugging Face, and save reports as Markdown. Use the second tab
+          to pull BLS Industry-at-a-Glance page content (overview text, tables, and listed series IDs).
         </p>
 
-        <form method="post">
-          <div>
-            <label for="code_type">Code Type</label>
-            <select id="code_type" name="code_type"></select>
+        <div class="tabs">
+          <button class="tab-btn" type="button" data-tab="report">Report Generator</button>
+          <button class="tab-btn" type="button" data-tab="bls_overview">BLS Industry Overview</button>
+          <button class="tab-btn" type="button" data-tab="oes_profiles">OES Wage Profiles</button>
+        </div>
+
+        <div id="panel-report" class="tab-panel">
+          <form method="post">
+            <input type="hidden" name="form_type" value="report" />
+            <input type="hidden" name="tab" value="report" />
+            <div>
+              <label for="code_type">Code Type</label>
+              <select id="code_type" name="code_type"></select>
+            </div>
+            <div>
+              <label for="code">Industry Code</label>
+              <select id="code" name="code"></select>
+            </div>
+            <div>
+              <button type="submit">Generate Report</button>
+            </div>
+          </form>
+
+          {% if summary_html %}
+            <div class="result">
+              <div class="meta">
+                {% if summary_file %}
+                  Saved markdown file: <strong>{{ summary_file }}</strong>
+                {% endif %}
+                {% if data_file %}
+                  | Saved raw data file: <strong>{{ data_file }}</strong>
+                {% endif %}
+              </div>
+              <div class="summary">{{ summary_html | safe }}</div>
+            </div>
+          {% endif %}
+
+          {% if plot_html %}
+            <div class="plot">{{ plot_html | safe }}</div>
+          {% endif %}
+        </div>
+
+        <div id="panel-bls_overview" class="tab-panel">
+          <form method="post" style="grid-template-columns: 3fr auto;">
+            <input type="hidden" name="form_type" value="bls_overview" />
+            <input type="hidden" name="tab" value="bls_overview" />
+            <div>
+              <label for="iag_url">Industry Page (from BLS NAICS index)</label>
+              <select id="iag_url" name="iag_url">
+                {% for item in iag_links %}
+                  <option value="{{ item.url }}" {% if item.url == selected_iag_url %}selected{% endif %}>
+                    {{ item.label }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <button type="submit">Load Industry Overview</button>
+            </div>
+          </form>
+
+          {% if iag_error %}
+            <div class="error">{{ iag_error }}</div>
+          {% endif %}
+
+          {% if iag_title %}
+            <div class="result">
+              <div class="meta">
+                Source page: <a href="{{ selected_iag_url }}" target="_blank" rel="noopener noreferrer">{{ selected_iag_url }}</a>
+                {% if iag_report_file %}
+                  | Saved report file: <strong>{{ iag_report_file }}</strong>
+                {% endif %}
+                {% if iag_data_file %}
+                  | Saved raw data file: <strong>{{ iag_data_file }}</strong>
+                {% endif %}
+              </div>
+
+              <div class="section-card">
+                <h3 style="margin-top: 0;">{{ iag_title }}</h3>
+                <p class="subtitle" style="margin-bottom: 0;">
+                  Report generated from scraped content | sections: {{ iag_sections|length }} | tables: {{ iag_tables|length }} | back-data series: {{ iag_backdata_series|length if iag_backdata_series else 0 }}
+                </p>
+              </div>
+
+              {% if iag_report_html %}
+                <div class="summary">{{ iag_report_html | safe }}</div>
+              {% endif %}
+
+              {% if iag_backdata_series or iag_series %}
+                <div class="section-card">
+                  <h3 style="margin-top: 0;">Back Data and Series Retrieval</h3>
+                  <div class="series-list">
+                    <ul>
+                      {% if iag_backdata_series %}
+                        {% for series in iag_backdata_series %}
+                          <li>
+                            <a href="{{ series.url }}" target="_blank" rel="noopener noreferrer">{{ series.id }}</a>
+                            {% if series.metric %}- {{ series.metric }}{% endif %}
+                            {% if series.table %}({{ series.table }}){% endif %}
+                          </li>
+                        {% endfor %}
+                      {% else %}
+                        {% for series in iag_series %}
+                          <li><a href="{{ series.url }}" target="_blank" rel="noopener noreferrer">{{ series.id }}</a></li>
+                        {% endfor %}
+                      {% endif %}
+                    </ul>
+                  </div>
+
+                  <form method="post" class="obs-form">
+                    <input type="hidden" name="form_type" value="bls_observation" />
+                    <input type="hidden" name="tab" value="bls_overview" />
+                    <input type="hidden" name="iag_url" value="{{ selected_iag_url }}" />
+                    <div>
+                      <label for="series_id">Fetch Series Observations (from Back Data or detected IDs)</label>
+                      <select id="series_id" name="series_id">
+                        {% if iag_backdata_series %}
+                          {% for series in iag_backdata_series %}
+                            <option value="{{ series.id }}" {% if series.id == selected_series_id %}selected{% endif %}>{{ series.label }}</option>
+                          {% endfor %}
+                        {% else %}
+                          {% for series in iag_series %}
+                            <option value="{{ series.id }}" {% if series.id == selected_series_id %}selected{% endif %}>{{ series.id }}</option>
+                          {% endfor %}
+                        {% endif %}
+                      </select>
+                    </div>
+                    <div>
+                      <button type="submit">Fetch Observations</button>
+                    </div>
+                  </form>
+
+                  {% if series_obs_plot_html %}
+                    <div class="plot">{{ series_obs_plot_html | safe }}</div>
+                  {% endif %}
+
+                  {% if series_obs_rows is not none %}
+                    <div class="obs-table">
+                      <table class="compact">
+                        <tr>
+                          <th>Date</th>
+                          <th>Period</th>
+                          <th>Value</th>
+                        </tr>
+                        {% for row in series_obs_rows %}
+                          <tr>
+                            <td>{{ row.date }}</td>
+                            <td>{{ row.period }}</td>
+                            <td>{{ row.value }}</td>
+                          </tr>
+                        {% endfor %}
+                      </table>
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div id="panel-oes_profiles" class="tab-panel">
+          <form method="post" style="grid-template-columns: 2fr auto;">
+            <input type="hidden" name="form_type" value="oes_profile" />
+            <input type="hidden" name="tab" value="oes_profiles" />
+            <div>
+              <label for="soc_code">SOC Occupation (cached from OES structure page)</label>
+              <select id="soc_code" name="soc_code">
+                {% for item in oes_profiles %}
+                  <option value="{{ item.soc_code }}" {% if item.soc_code == selected_soc_code %}selected{% endif %}>
+                    {{ item.soc_code }} - {{ item.soc_name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <button type="submit">Build Occupation Report</button>
+            </div>
+          </form>
+
+          {% if oes_error %}
+            <div class="warning">{{ oes_error }}</div>
+          {% endif %}
+
+          {% if oes_profile_report_html %}
+            <div class="result">
+              <div class="meta">
+                {% if oes_profile_report_file %}
+                  Saved report file: <strong>{{ oes_profile_report_file }}</strong>
+                {% endif %}
+                {% if oes_profile_data_file %}
+                  | Saved profile JSON: <strong>{{ oes_profile_data_file }}</strong>
+                {% endif %}
+              </div>
+              <div class="summary">{{ oes_profile_report_html | safe }}</div>
+            </div>
+          {% endif %}
+
+          <div class="section-card">
+            <h3 style="margin-top: 0;">State-Level OES Data via BLS API</h3>
+            <form method="post" class="obs-form">
+              <input type="hidden" name="form_type" value="oes_dataset" />
+              <input type="hidden" name="tab" value="oes_profiles" />
+              <div>
+                <label for="soc_code_dataset">SOC Code</label>
+                <select id="soc_code_dataset" name="soc_code">
+                  {% for item in oes_profiles %}
+                    <option value="{{ item.soc_code }}" {% if item.soc_code == selected_soc_code %}selected{% endif %}>
+                      {{ item.soc_code }} - {{ item.soc_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label for="oes_metric">Metric</label>
+                <select id="oes_metric" name="oes_metric">
+                  {% for metric in ["A_MEAN", "A_MEDIAN", "TOT_EMP", "H_MEAN", "H_MEDIAN"] %}
+                    <option value="{{ metric }}" {% if metric == selected_oes_metric %}selected{% endif %}>{{ metric }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <button type="submit">Fetch via BLS API + Build Graphs</button>
+              </div>
+            </form>
+
+            {% if oes_dataset_file %}
+              <p class="meta">Saved dataset JSON: <strong>{{ oes_dataset_file }}</strong></p>
+            {% endif %}
+
+            {% if oes_state_map_html %}
+              <div class="plot">{{ oes_state_map_html | safe }}</div>
+            {% endif %}
+
+            {% if oes_top_areas_plot_html %}
+              <div class="plot">{{ oes_top_areas_plot_html | safe }}</div>
+            {% endif %}
+
+            {% if oes_dataset_preview %}
+              <div class="obs-table">
+                <table class="compact">
+                  <tr>
+                    {% for key in oes_dataset_preview[0].keys() %}
+                      <th>{{ key }}</th>
+                    {% endfor %}
+                  </tr>
+                  {% for row in oes_dataset_preview %}
+                    <tr>
+                      {% for value in row.values() %}
+                        <td>{{ value }}</td>
+                      {% endfor %}
+                    </tr>
+                  {% endfor %}
+                </table>
+              </div>
+            {% endif %}
           </div>
-          <div>
-            <label for="code">Industry Code</label>
-            <select id="code" name="code"></select>
-          </div>
-          <div>
-            <button type="submit">Generate Report</button>
-          </div>
-        </form>
+        </div>
 
         {% if error %}
           <div class="error">{{ error }}</div>
@@ -163,28 +519,36 @@
         {% if warning %}
           <div class="warning">{{ warning }}</div>
         {% endif %}
-
-        {% if summary_html %}
-          <div class="result">
-            <div class="meta">
-              {% if summary_file %}
-                Saved markdown file: <strong>{{ summary_file }}</strong>
-              {% endif %}
-              {% if data_file %}
-                | Saved raw data file: <strong>{{ data_file }}</strong>
-              {% endif %}
-            </div>
-            <div class="summary">{{ summary_html | safe }}</div>
-          </div>
-        {% endif %}
-
-        {% if plot_html %}
-          <div class="plot">{{ plot_html | safe }}</div>
-        {% endif %}
       </div>
     </div>
 
     <script>
+      const activeTab = {{ active_tab | tojson }} || "report";
+      const tabButtons = document.querySelectorAll(".tab-btn");
+      const tabPanels = {
+        report: document.getElementById("panel-report"),
+        bls_overview: document.getElementById("panel-bls_overview"),
+        oes_profiles: document.getElementById("panel-oes_profiles"),
+      };
+
+      function setActiveTab(tabName) {
+        tabButtons.forEach((btn) => {
+          const isActive = btn.dataset.tab === tabName;
+          btn.classList.toggle("active", isActive);
+        });
+        Object.keys(tabPanels).forEach((key) => {
+          tabPanels[key].classList.toggle("active", key === tabName);
+        });
+      }
+
+      tabButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          setActiveTab(btn.dataset.tab);
+        });
+      });
+
+      setActiveTab(activeTab);
+
       const codesByType = {{ codes_by_type | tojson }};
       const selectedType = {{ selected_type | tojson }};
       const selectedCode = {{ selected_code | tojson }};

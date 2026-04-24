@@ -1,0 +1,31 @@
+{
+  "source_url": "https://www.bls.gov/oes/tables.htm",
+  "fetched_at": "2026-04-24 02:35:25 UTC",
+  "links": [
+    {
+      "label": "May 2023 Metropolitan and Nonmetropolitan Area Estimates (ZIP)",
+      "url": "https://www.bls.gov/oes/special-requests/oesm23ma.zip",
+      "section": "MSA"
+    },
+    {
+      "label": "May 2023 National Industry-Specific and Ownership Estimates (ZIP)",
+      "url": "https://www.bls.gov/oes/special-requests/oesm23in4.zip",
+      "section": "National"
+    },
+    {
+      "label": "May 2023 National Occupational Employment and Wage Estimates (ZIP)",
+      "url": "https://www.bls.gov/oes/special-requests/oesm23nat.zip",
+      "section": "National"
+    },
+    {
+      "label": "May 2023 All Data for Employment and Wage Estimates (ZIP)",
+      "url": "https://www.bls.gov/oes/special-requests/oesm23all.zip",
+      "section": "Other"
+    },
+    {
+      "label": "May 2023 State Occupational Employment and Wage Estimates (ZIP)",
+      "url": "https://www.bls.gov/oes/special-requests/oesm23st.zip",
+      "section": "State"
+    }
+  ]
+}

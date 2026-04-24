@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Agriculture, Forestry, Fishing and Hunting",
+    "naics": "11",
+    "url": "https://www.bls.gov/iag/tgs/iag11.htm"
+  },
+  {
+    "name": "Mining, Quarrying, and Oil and Gas Extraction",
+    "naics": "21",
+    "url": "https://www.bls.gov/iag/tgs/iag21.htm"
+  },
+  {
+    "name": "Utilities",
+    "naics": "22",
+    "url": "https://www.bls.gov/iag/tgs/iag22.htm"
+  },
+  {
+    "name": "Construction",
+    "naics": "23",
+    "url": "https://www.bls.gov/iag/tgs/iag23.htm"
+  },
+  {
+    "name": "Manufacturing",
+    "naics": "31-33",
+    "url": "https://www.bls.gov/iag/tgs/iag31-33.htm"
+  },
+  {
+    "name": "Wholesale Trade",
+    "naics": "42",
+    "url": "https://www.bls.gov/iag/tgs/iag42.htm"
+  },
+  {
+    "name": "Retail Trade",
+    "naics": "44-45",
+    "url": "https://www.bls.gov/iag/tgs/iag44-45.htm"
+  },
+  {
+    "name": "Transportation and Warehousing",
+    "naics": "48-49",
+    "url": "https://www.bls.gov/iag/tgs/iag48-49.htm"
+  },
+  {
+    "name": "Information",
+    "naics": "51",
+    "url": "https://www.bls.gov/iag/tgs/iag51.htm"
+  },
+  {
+    "name": "Finance and Insurance",
+    "naics": "52",
+    "url": "https://www.bls.gov/iag/tgs/iag52.htm"
+  },
+  {
+    "name": "Real Estate and Rental and Leasing",
+    "naics": "53",
+    "url": "https://www.bls.gov/iag/tgs/iag53.htm"
+  },
+  {
+    "name": "Professional, Scientific, and Technical Services",
+    "naics": "54",
+    "url": "https://www.bls.gov/iag/tgs/iag54.htm"
+  },
+  {
+    "name": "Management of Companies and Enterprises",
+    "naics": "55",
+    "url": "https://www.bls.gov/iag/tgs/iag55.htm"
+  },
+  {
+    "name": "Administrative and Support Services",
+    "naics": "56",
+    "url": "https://www.bls.gov/iag/tgs/iag56.htm"
+  },
+  {
+    "name": "Educational Services",
+    "naics": "61",
+    "url": "https://www.bls.gov/iag/tgs/iag61.htm"
+  },
+  {
+    "name": "Health Care and Social Assistance",
+    "naics": "62",
+    "url": "https://www.bls.gov/iag/tgs/iag62.htm"
+  },
+  {
+    "name": "Arts, Entertainment, and Recreation",
+    "naics": "71",
+    "url": "https://www.bls.gov/iag/tgs/iag71.htm"
+  },
+  {
+    "name": "Accommodation and Food Services",
+    "naics": "72",
+    "url": "https://www.bls.gov/iag/tgs/iag72.htm"
+  },
+  {
+    "name": "Other Services",
+    "naics": "81",
+    "url": "https://www.bls.gov/iag/tgs/iag81.htm"
+  },
+  {
+    "name": "Public Administration",
+    "naics": "92",
+    "url": "https://www.bls.gov/iag/tgs/iag92.htm"
+  }
+]

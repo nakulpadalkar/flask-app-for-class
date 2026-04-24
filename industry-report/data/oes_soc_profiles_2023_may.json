@@ -1,0 +1,126 @@
+{
+  "source_url": "https://www.bls.gov/oes/2023/may/oes_stru.htm",
+  "fetched_at": "2026-04-24 02:30:59 UTC",
+  "profiles": [
+    {
+      "soc_code": "11-0000",
+      "soc_name": "Management Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes110000.htm"
+    },
+    {
+      "soc_code": "13-0000",
+      "soc_name": "Business and Financial Operations Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes130000.htm"
+    },
+    {
+      "soc_code": "15-0000",
+      "soc_name": "Computer and Mathematical Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes150000.htm"
+    },
+    {
+      "soc_code": "17-0000",
+      "soc_name": "Architecture and Engineering Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes170000.htm"
+    },
+    {
+      "soc_code": "19-0000",
+      "soc_name": "Life, Physical, and Social Science Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes190000.htm"
+    },
+    {
+      "soc_code": "21-0000",
+      "soc_name": "Community and Social Service Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes210000.htm"
+    },
+    {
+      "soc_code": "23-0000",
+      "soc_name": "Legal Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes230000.htm"
+    },
+    {
+      "soc_code": "25-0000",
+      "soc_name": "Educational Instruction and Library Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes250000.htm"
+    },
+    {
+      "soc_code": "27-0000",
+      "soc_name": "Arts, Design, Entertainment, Sports, and Media Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes270000.htm"
+    },
+    {
+      "soc_code": "29-0000",
+      "soc_name": "Healthcare Practitioners and Technical Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes290000.htm"
+    },
+    {
+      "soc_code": "31-0000",
+      "soc_name": "Healthcare Support Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes310000.htm"
+    },
+    {
+      "soc_code": "35-0000",
+      "soc_name": "Food Preparation and Serving Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes350000.htm"
+    },
+    {
+      "soc_code": "37-0000",
+      "soc_name": "Building and Grounds Cleaning and Maintenance Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes370000.htm"
+    },
+    {
+      "soc_code": "39-0000",
+      "soc_name": "Personal Care and Service Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes390000.htm"
+    },
+    {
+      "soc_code": "41-0000",
+      "soc_name": "Sales and Related Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes410000.htm"
+    },
+    {
+      "soc_code": "43-0000",
+      "soc_name": "Office and Administrative Support Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes430000.htm"
+    },
+    {
+      "soc_code": "47-0000",
+      "soc_name": "Construction and Extraction Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes470000.htm"
+    },
+    {
+      "soc_code": "49-0000",
+      "soc_name": "Installation, Maintenance, and Repair Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes490000.htm"
+    },
+    {
+      "soc_code": "51-0000",
+      "soc_name": "Production Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes510000.htm"
+    },
+    {
+      "soc_code": "53-0000",
+      "soc_name": "Transportation and Material Moving Occupations",
+      "category": "SOC Major Group",
+      "url": "https://www.bls.gov/oes/2023/may/oes530000.htm"
+    }
+  ]
+}
