@@ -1,0 +1,11 @@
+{
+  "code_type": "naics",
+  "code": "52",
+  "industry_name": "Finance and Insurance",
+  "fred_series": {
+    "id": null,
+    "title": null
+  },
+  "summary_markdown_file": "naics-52-20260424-141139.md",
+  "observations": []
+}

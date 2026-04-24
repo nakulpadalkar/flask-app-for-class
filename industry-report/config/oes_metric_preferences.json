@@ -1,0 +1,10 @@
+{
+  "default_order": ["A_MEAN", "A_MEDIAN", "TOT_EMP", "H_MEAN", "H_MEDIAN"],
+  "soc_prefix_overrides": {
+    "11": ["A_MEAN", "A_MEDIAN", "TOT_EMP"],
+    "15": ["A_MEAN", "TOT_EMP", "A_MEDIAN"],
+    "29": ["A_MEAN", "A_MEDIAN", "TOT_EMP", "H_MEAN"],
+    "41": ["TOT_EMP", "A_MEAN", "A_MEDIAN"],
+    "53": ["TOT_EMP", "A_MEAN", "A_MEDIAN"]
+  }
+}

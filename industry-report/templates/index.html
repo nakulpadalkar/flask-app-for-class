@@ -226,6 +226,18 @@
         background: #fff;
       }
 
+      .soc-cascade {
+        display: none;
+        grid-column: 1 / -1;
+      }
+
+      .soc-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 0.75rem;
+        align-items: end;
+      }
+
       a.file-link {
         display: inline-block;
         margin-right: 1rem;
@@ -239,6 +251,10 @@
         }
 
         .obs-form {
+          grid-template-columns: 1fr;
+        }
+
+        .soc-grid {
           grid-template-columns: 1fr;
         }
       }
@@ -271,6 +287,23 @@
             <div>
               <label for="code">Industry Code</label>
               <select id="code" name="code"></select>
+            </div>
+            <div id="soc_cascade" class="soc-cascade">
+              <label>SOC Drilldown</label>
+              <div class="soc-grid">
+                <div>
+                  <label for="soc_major">Major Group</label>
+                  <select id="soc_major"></select>
+                </div>
+                <div>
+                  <label for="soc_sub">Sub Group</label>
+                  <select id="soc_sub"></select>
+                </div>
+                <div>
+                  <label for="soc_detail">Detailed Occupation</label>
+                  <select id="soc_detail"></select>
+                </div>
+              </div>
             </div>
             <div>
               <button type="submit">Generate Report</button>
@@ -419,9 +452,9 @@
             <input type="hidden" name="form_type" value="oes_profile" />
             <input type="hidden" name="tab" value="oes_profiles" />
             <div>
-              <label for="soc_code">SOC Occupation (cached from OES structure page)</label>
+              <label for="soc_code">Management Occupations (Major group + Detailed occupations)</label>
               <select id="soc_code" name="soc_code">
-                {% for item in oes_profiles %}
+                {% for item in management_oes_profiles %}
                   <option value="{{ item.soc_code }}" {% if item.soc_code == selected_soc_code %}selected{% endif %}>
                     {{ item.soc_code }} - {{ item.soc_name }}
                   </option>
@@ -453,13 +486,14 @@
 
           <div class="section-card">
             <h3 style="margin-top: 0;">State-Level OES Data via BLS API</h3>
+            <p class="meta">Use BLS API directly for plotting. Set year to fetch that year's OEWS data.</p>
             <form method="post" class="obs-form">
               <input type="hidden" name="form_type" value="oes_dataset" />
               <input type="hidden" name="tab" value="oes_profiles" />
               <div>
                 <label for="soc_code_dataset">SOC Code</label>
                 <select id="soc_code_dataset" name="soc_code">
-                  {% for item in oes_profiles %}
+                  {% for item in management_oes_profiles %}
                     <option value="{{ item.soc_code }}" {% if item.soc_code == selected_soc_code %}selected{% endif %}>
                       {{ item.soc_code }} - {{ item.soc_name }}
                     </option>
@@ -467,17 +501,54 @@
                 </select>
               </div>
               <div>
-                <label for="oes_metric">Metric</label>
-                <select id="oes_metric" name="oes_metric">
-                  {% for metric in ["A_MEAN", "A_MEDIAN", "TOT_EMP", "H_MEAN", "H_MEDIAN"] %}
-                    <option value="{{ metric }}" {% if metric == selected_oes_metric %}selected{% endif %}>{{ metric }}</option>
-                  {% endfor %}
+                <label for="oes_measure">Measure</label>
+                <select id="oes_measure" name="oes_measure">
+                  <option value="Employment" {% if selected_oes_measure == "Employment" %}selected{% endif %}>Employment</option>
                 </select>
               </div>
               <div>
-                <button type="submit">Fetch via BLS API + Build Graphs</button>
+                <label for="oes_scope">Dimension</label>
+                <select id="oes_scope" name="oes_scope">
+                  <option value="Industry" {% if selected_oes_scope == "Industry" %}selected{% endif %}>Industry</option>
+                  <option value="State" {% if selected_oes_scope == "State" %}selected{% endif %}>State</option>
+                  <option value="Metropolitan and nonmetropolitan area" {% if selected_oes_scope == "Metropolitan and nonmetropolitan area" %}selected{% endif %}>Metropolitan and nonmetropolitan area</option>
+                </select>
+              </div>
+              <div>
+                <label for="oes_year">Year</label>
+                <input id="oes_year" name="oes_year" type="number" min="2000" max="{{ current_year }}" value="{{ selected_oes_year or 2023 }}" />
+              </div>
+              <div>
+                <label for="oes_metric">Metric</label>
+                <select id="oes_metric" name="oes_metric">
+                  {% if available_oes_metrics %}
+                    {% for metric in available_oes_metrics %}
+                      <option value="{{ metric }}" {% if metric == selected_oes_metric %}selected{% endif %}>{{ metric }}</option>
+                    {% endfor %}
+                  {% else %}
+                    <option value="" selected>No metrics available</option>
+                  {% endif %}
+                </select>
+              </div>
+              <div>
+                <label for="display_records">Display records</label>
+                <input id="display_records" name="display_records" type="number" min="5" max="500" value="{{ display_records or 25 }}" />
+              </div>
+              <div>
+                <button type="submit">Fetch OEWS Data</button>
               </div>
             </form>
+
+            {% if selected_oes_scope != "State" and oes_dimension_links %}
+              <div class="meta" style="margin-top: 10px;">
+                <strong>OEWS {{ selected_oes_scope }} downloads:</strong>
+                <ul>
+                  {% for item in oes_dimension_links %}
+                    <li><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.label }}</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
 
             {% if oes_dataset_file %}
               <p class="meta">Saved dataset JSON: <strong>{{ oes_dataset_file }}</strong></p>
@@ -550,11 +621,207 @@
       setActiveTab(activeTab);
 
       const codesByType = {{ codes_by_type | tojson }};
+      const oesProfiles = {{ oes_profiles | tojson }};
       const selectedType = {{ selected_type | tojson }};
       const selectedCode = {{ selected_code | tojson }};
 
       const typeSelect = document.getElementById("code_type");
       const codeSelect = document.getElementById("code");
+      const socCascade = document.getElementById("soc_cascade");
+      const socMajorSelect = document.getElementById("soc_major");
+      const socSubSelect = document.getElementById("soc_sub");
+      const socDetailSelect = document.getElementById("soc_detail");
+
+      function toSocLabel(code, name) {
+        return `${code} - ${name || "Occupation"}`;
+      }
+
+      function socCodeFromProfile(row) {
+        const code = String((row && row.soc_code) || "").trim();
+        const name = String((row && row.soc_name) || "").trim();
+        if (!code || !name) {
+          return null;
+        }
+        return { code, name };
+      }
+
+      function uniqueSocRows() {
+        const merged = [];
+        (codesByType.soc || []).forEach((row) => {
+          if (row && row.code) {
+            merged.push({ code: String(row.code).trim(), name: String(row.name || "").trim() });
+          }
+        });
+        (oesProfiles || []).forEach((row) => {
+          const parsed = socCodeFromProfile(row);
+          if (parsed) {
+            merged.push(parsed);
+          }
+        });
+
+        const byCode = new Map();
+        merged.forEach((row) => {
+          if (!row.code) {
+            return;
+          }
+          const existing = byCode.get(row.code);
+          if (!existing || (!existing.name && row.name)) {
+            byCode.set(row.code, row);
+          }
+        });
+        return Array.from(byCode.values()).sort((a, b) => a.code.localeCompare(b.code));
+      }
+
+      function buildSocHierarchy(rows) {
+        const hierarchy = new Map();
+
+        function ensureMajor(majorCode) {
+          if (!hierarchy.has(majorCode)) {
+            hierarchy.set(majorCode, {
+              code: majorCode,
+              name: majorCode,
+              sub: new Map(),
+            });
+          }
+          return hierarchy.get(majorCode);
+        }
+
+        rows.forEach((row) => {
+          const code = row.code;
+          const name = row.name;
+          const match = /^(\d{2})-(\d{4})$/.exec(code);
+          if (!match) {
+            return;
+          }
+
+          const majorCode = `${match[1]}-0000`;
+          const major = ensureMajor(majorCode);
+          if (code === majorCode && name) {
+            major.name = name;
+          }
+
+          const subKey = `${match[1]}-${match[2].slice(0, 2)}xx`;
+          if (!major.sub.has(subKey)) {
+            major.sub.set(subKey, {
+              key: subKey,
+              label: subKey,
+              rows: [],
+            });
+          }
+
+          const subgroup = major.sub.get(subKey);
+          if (code.endsWith("00") && code !== majorCode && name) {
+            subgroup.label = `${subKey} - ${name}`;
+          }
+
+          if (code !== majorCode) {
+            subgroup.rows.push({ code, name });
+          }
+        });
+
+        return Array.from(hierarchy.values())
+          .sort((a, b) => a.code.localeCompare(b.code))
+          .map((major) => ({
+            ...major,
+            sub: Array.from(major.sub.values())
+              .map((sub) => ({
+                ...sub,
+                rows: sub.rows.sort((a, b) => a.code.localeCompare(b.code)),
+              }))
+              .filter((sub) => sub.rows.length > 0)
+              .sort((a, b) => a.key.localeCompare(b.key)),
+          }))
+          .filter((major) => major.sub.length > 0);
+      }
+
+      const socHierarchy = buildSocHierarchy(uniqueSocRows());
+
+      function setNativeCodeSelection(code) {
+        const options = Array.from(codeSelect.options);
+        const found = options.find((opt) => opt.value === code);
+        if (found) {
+          codeSelect.value = code;
+        } else {
+          const option = document.createElement("option");
+          option.value = code;
+          option.textContent = code;
+          codeSelect.appendChild(option);
+          codeSelect.value = code;
+        }
+      }
+
+      function populateSocMajors(initialCode) {
+        socMajorSelect.innerHTML = "";
+        socHierarchy.forEach((major) => {
+          const option = document.createElement("option");
+          option.value = major.code;
+          option.textContent = toSocLabel(major.code, major.name);
+          socMajorSelect.appendChild(option);
+        });
+
+        if (!socHierarchy.length) {
+          return null;
+        }
+
+        const initialMajor = (initialCode.match(/^(\d{2})-/) || [])[1];
+        const wanted = initialMajor ? `${initialMajor}-0000` : socHierarchy[0].code;
+        socMajorSelect.value = socHierarchy.some((m) => m.code === wanted) ? wanted : socHierarchy[0].code;
+        return socMajorSelect.value;
+      }
+
+      function populateSocSubs(majorCode, initialCode) {
+        socSubSelect.innerHTML = "";
+        const major = socHierarchy.find((m) => m.code === majorCode);
+        if (!major || !major.sub.length) {
+          return null;
+        }
+
+        major.sub.forEach((sub) => {
+          const option = document.createElement("option");
+          option.value = sub.key;
+          option.textContent = sub.label;
+          socSubSelect.appendChild(option);
+        });
+
+        const match = /^(\d{2})-(\d{2})\d{2}$/.exec(initialCode || "");
+        const wantedKey = match ? `${match[1]}-${match[2]}xx` : major.sub[0].key;
+        socSubSelect.value = major.sub.some((s) => s.key === wantedKey) ? wantedKey : major.sub[0].key;
+        return socSubSelect.value;
+      }
+
+      function populateSocDetails(majorCode, subKey, initialCode) {
+        socDetailSelect.innerHTML = "";
+        const major = socHierarchy.find((m) => m.code === majorCode);
+        const subgroup = major ? major.sub.find((s) => s.key === subKey) : null;
+        if (!subgroup || !subgroup.rows.length) {
+          return null;
+        }
+
+        subgroup.rows.forEach((row) => {
+          const option = document.createElement("option");
+          option.value = row.code;
+          option.textContent = toSocLabel(row.code, row.name);
+          socDetailSelect.appendChild(option);
+        });
+
+        socDetailSelect.value = subgroup.rows.some((r) => r.code === initialCode)
+          ? initialCode
+          : subgroup.rows[0].code;
+        setNativeCodeSelection(socDetailSelect.value);
+        return socDetailSelect.value;
+      }
+
+      function initSocCascade(initialCode) {
+        const majorCode = populateSocMajors(initialCode);
+        if (!majorCode) {
+          return;
+        }
+        const subKey = populateSocSubs(majorCode, initialCode);
+        if (!subKey) {
+          return;
+        }
+        populateSocDetails(majorCode, subKey, initialCode);
+      }
 
       function loadTypeOptions() {
         typeSelect.innerHTML = "";
@@ -582,6 +849,15 @@
           }
           codeSelect.appendChild(option);
         });
+
+        if (typeKey === "soc" && socHierarchy.length) {
+          codeSelect.style.display = "none";
+          socCascade.style.display = "block";
+          initSocCascade(initialCode || selectedCode);
+        } else {
+          codeSelect.style.display = "block";
+          socCascade.style.display = "none";
+        }
       }
 
       loadTypeOptions();
@@ -589,6 +865,21 @@
 
       typeSelect.addEventListener("change", (event) => {
         loadCodeOptions(event.target.value, "");
+      });
+
+      socMajorSelect.addEventListener("change", () => {
+        const subKey = populateSocSubs(socMajorSelect.value, "");
+        if (subKey) {
+          populateSocDetails(socMajorSelect.value, subKey, "");
+        }
+      });
+
+      socSubSelect.addEventListener("change", () => {
+        populateSocDetails(socMajorSelect.value, socSubSelect.value, "");
+      });
+
+      socDetailSelect.addEventListener("change", () => {
+        setNativeCodeSelection(socDetailSelect.value);
       });
     </script>
   </body>

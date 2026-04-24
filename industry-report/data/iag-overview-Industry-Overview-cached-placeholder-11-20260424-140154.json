@@ -1,0 +1,17 @@
+{
+  "source_url": "https://www.bls.gov/iag/tgs/iag11.htm",
+  "industry_title": "Industry Overview (cached placeholder 11)",
+  "fetched_at": "2026-04-24 14:01:54 UTC",
+  "sections": [
+    {
+      "title": "Data Availability",
+      "paragraphs": [
+        "BLS industry page fetch was blocked (HTTP 403). No cached profile payload was available for this URL.",
+        "Use an accessible network once to populate the cache, then this app can reuse local JSON without scraping again."
+      ]
+    }
+  ],
+  "tables": [],
+  "series": [],
+  "backdata_series": []
+}

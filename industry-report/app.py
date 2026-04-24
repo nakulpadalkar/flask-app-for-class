@@ -21,6 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 SUMMARY_DIR = BASE_DIR / "summaries"
 TEMPLATE_DIR = BASE_DIR / "templates"
+CONFIG_DIR = BASE_DIR / "config"
 
 BLS_OE_INDUSTRY_URLS = [
     "https://download.bls.gov/pub/time.series/oe/oe.industry",
@@ -57,95 +58,24 @@ OES_DATATYPES: Dict[str, str] = {
     "A_MEDIAN":"13",   # Median annual wage
 }
 
-# State FIPS → (abbreviation, full name, 7-char area_code for OES series)
+@lru_cache(maxsize=8)
+def load_static_json_config(filename: str):
+    path = CONFIG_DIR / filename
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+# State FIPS -> (abbreviation, full name, 7-char area_code for OES series)
+_OES_STATE_MAP_RAW = load_static_json_config("oes_state_map.json")
 OES_STATE_MAP: Dict[str, Tuple[str, str, str]] = {
-    "01": ("AL", "Alabama",        "0100000"),
-    "02": ("AK", "Alaska",         "0200000"),
-    "04": ("AZ", "Arizona",        "0400000"),
-    "05": ("AR", "Arkansas",       "0500000"),
-    "06": ("CA", "California",     "0600000"),
-    "08": ("CO", "Colorado",       "0800000"),
-    "09": ("CT", "Connecticut",    "0900000"),
-    "10": ("DE", "Delaware",       "1000000"),
-    "11": ("DC", "Dist. of Columbia", "1100000"),
-    "12": ("FL", "Florida",        "1200000"),
-    "13": ("GA", "Georgia",        "1300000"),
-    "15": ("HI", "Hawaii",         "1500000"),
-    "16": ("ID", "Idaho",          "1600000"),
-    "17": ("IL", "Illinois",       "1700000"),
-    "18": ("IN", "Indiana",        "1800000"),
-    "19": ("IA", "Iowa",           "1900000"),
-    "20": ("KS", "Kansas",         "2000000"),
-    "21": ("KY", "Kentucky",       "2100000"),
-    "22": ("LA", "Louisiana",      "2200000"),
-    "23": ("ME", "Maine",          "2300000"),
-    "24": ("MD", "Maryland",       "2400000"),
-    "25": ("MA", "Massachusetts",  "2500000"),
-    "26": ("MI", "Michigan",       "2600000"),
-    "27": ("MN", "Minnesota",      "2700000"),
-    "28": ("MS", "Mississippi",    "2800000"),
-    "29": ("MO", "Missouri",       "2900000"),
-    "30": ("MT", "Montana",        "3000000"),
-    "31": ("NE", "Nebraska",       "3100000"),
-    "32": ("NV", "Nevada",         "3200000"),
-    "33": ("NH", "New Hampshire",  "3300000"),
-    "34": ("NJ", "New Jersey",     "3400000"),
-    "35": ("NM", "New Mexico",     "3500000"),
-    "36": ("NY", "New York",       "3600000"),
-    "37": ("NC", "North Carolina", "3700000"),
-    "38": ("ND", "North Dakota",   "3800000"),
-    "39": ("OH", "Ohio",           "3900000"),
-    "40": ("OK", "Oklahoma",       "4000000"),
-    "41": ("OR", "Oregon",         "4100000"),
-    "42": ("PA", "Pennsylvania",   "4200000"),
-    "44": ("RI", "Rhode Island",   "4400000"),
-    "45": ("SC", "South Carolina", "4500000"),
-    "46": ("SD", "South Dakota",   "4600000"),
-    "47": ("TN", "Tennessee",      "4700000"),
-    "48": ("TX", "Texas",          "4800000"),
-    "49": ("UT", "Utah",           "4900000"),
-    "50": ("VT", "Vermont",        "5000000"),
-    "51": ("VA", "Virginia",       "5100000"),
-    "53": ("WA", "Washington",     "5300000"),
-    "54": ("WV", "West Virginia",  "5400000"),
-    "55": ("WI", "Wisconsin",      "5500000"),
-    "56": ("WY", "Wyoming",        "5600000"),
+    key: (str(value[0]), str(value[1]), str(value[2]))
+    for key, value in _OES_STATE_MAP_RAW.items()
 }
 
-# Abbreviation → full name (for choropleth)
+# Abbreviation -> full name (for choropleth)
 OES_STATE_ABBR_TO_NAME: Dict[str, str] = {v[0]: v[1] for v in OES_STATE_MAP.values()}
 
-NAICS_TO_KEYWORDS = {
-    "11": ["agriculture", "forestry", "fishing"],
-    "21": ["mining", "oil", "gas"],
-    "22": ["utilities"],
-    "23": ["construction"],
-    "31": ["manufacturing"],
-    "32": ["manufacturing"],
-    "33": ["manufacturing"],
-    "42": ["wholesale"],
-    "44": ["retail"],
-    "45": ["retail"],
-    "48": ["transportation", "warehousing"],
-    "49": ["transportation", "warehousing"],
-    "51": ["information"],
-    "52": ["finance", "insurance"],
-    "53": ["real estate", "rental", "leasing"],
-    "54": ["professional", "technical"],
-    "55": ["management"],
-    "56": ["administrative", "support"],
-    "61": ["education", "educational"],
-    "62": ["health", "social assistance"],
-    "71": ["arts", "entertainment", "recreation"],
-    "72": ["accommodation", "food services"],
-    "81": ["other services"],
-    "92": ["public administration", "government"],
-}
-
-TEXT_STOPWORDS = {
-    "and", "the", "for", "with", "from", "services", "service", "other",
-    "industry", "industries", "assistance", "trade", "care",
-}
+NAICS_TO_KEYWORDS: Dict[str, List[str]] = load_static_json_config("naics_keywords.json")
+TEXT_STOPWORDS = set(load_static_json_config("text_stopwords.json"))
 
 app = Flask(__name__, template_folder=str(TEMPLATE_DIR))
 load_dotenv(BASE_DIR / ".env")
@@ -177,6 +107,28 @@ def utc_stamp() -> str:
 
 def utc_timestamp_label() -> str:
     return utc_now().strftime("%Y-%m-%d %H:%M:%S UTC")
+
+
+def get_bls_registration_key() -> str:
+    return (
+        os.environ.get("BLS_API_KEY", "").strip()
+        or os.environ.get("BLS_API_KEY_V2", "").strip()
+        or os.environ.get("BLS_REGISTRATION_KEY", "").strip()
+    )
+
+
+def get_fred_api_key() -> str:
+    return os.getenv("FRED_API_KEY", "").strip()
+
+
+def _bls_post_timeseries(payload: Dict) -> Dict:
+    headers = {
+        "Content-type": "application/json",
+        "Accept": "application/json",
+    }
+    resp = requests.post(BLS_API_URL, data=json.dumps(payload), headers=headers, timeout=60)
+    resp.raise_for_status()
+    return resp.json()
 
 
 def read_iag_links_from_file(path: Path) -> Optional[List[Dict[str, str]]]:
@@ -328,54 +280,33 @@ def ensure_dirs() -> None:
     OES_API_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
+@lru_cache(maxsize=1)
+def get_fallback_codes_config() -> Dict[str, List[Dict[str, str]]]:
+    payload = load_static_json_config("fallback_codes.json")
+    if not isinstance(payload, dict):
+        return {"naics": [], "soc": []}
+
+    def normalize(rows) -> List[Dict[str, str]]:
+        out: List[Dict[str, str]] = []
+        if not isinstance(rows, list):
+            return out
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            code = str(row.get("code", "")).strip()
+            name = str(row.get("name", "")).strip()
+            if not code or not name:
+                continue
+            out.append({"code": code, "name": name})
+        return out
+
+    naics = normalize(payload.get("naics"))
+    soc = normalize(payload.get("soc"))
+    return {"naics": naics, "soc": soc}
+
+
 def fallback_codes() -> Dict[str, List[Dict[str, str]]]:
-    # Keep this small and stable so the app still works when BLS file endpoints are blocked.
-    return {
-        "naics": [
-            {"code": "11", "name": "Agriculture, Forestry, Fishing and Hunting"},
-            {"code": "21", "name": "Mining, Quarrying, and Oil and Gas Extraction"},
-            {"code": "22", "name": "Utilities"},
-            {"code": "23", "name": "Construction"},
-            {"code": "31-33", "name": "Manufacturing"},
-            {"code": "42", "name": "Wholesale Trade"},
-            {"code": "44-45", "name": "Retail Trade"},
-            {"code": "48-49", "name": "Transportation and Warehousing"},
-            {"code": "51", "name": "Information"},
-            {"code": "52", "name": "Finance and Insurance"},
-            {"code": "53", "name": "Real Estate and Rental and Leasing"},
-            {"code": "54", "name": "Professional, Scientific, and Technical Services"},
-            {"code": "55", "name": "Management of Companies and Enterprises"},
-            {"code": "56", "name": "Administrative and Support Services"},
-            {"code": "61", "name": "Educational Services"},
-            {"code": "62", "name": "Health Care and Social Assistance"},
-            {"code": "71", "name": "Arts, Entertainment, and Recreation"},
-            {"code": "72", "name": "Accommodation and Food Services"},
-            {"code": "81", "name": "Other Services"},
-            {"code": "92", "name": "Public Administration"},
-        ],
-        "soc": [
-            {"code": "11-0000", "name": "Management Occupations"},
-            {"code": "13-0000", "name": "Business and Financial Operations Occupations"},
-            {"code": "15-0000", "name": "Computer and Mathematical Occupations"},
-            {"code": "17-0000", "name": "Architecture and Engineering Occupations"},
-            {"code": "19-0000", "name": "Life, Physical, and Social Science Occupations"},
-            {"code": "21-0000", "name": "Community and Social Service Occupations"},
-            {"code": "23-0000", "name": "Legal Occupations"},
-            {"code": "25-0000", "name": "Educational Instruction and Library Occupations"},
-            {"code": "27-0000", "name": "Arts, Design, Entertainment, Sports, and Media Occupations"},
-            {"code": "29-0000", "name": "Healthcare Practitioners and Technical Occupations"},
-            {"code": "31-0000", "name": "Healthcare Support Occupations"},
-            {"code": "35-0000", "name": "Food Preparation and Serving Occupations"},
-            {"code": "37-0000", "name": "Building and Grounds Cleaning and Maintenance Occupations"},
-            {"code": "39-0000", "name": "Personal Care and Service Occupations"},
-            {"code": "41-0000", "name": "Sales and Related Occupations"},
-            {"code": "43-0000", "name": "Office and Administrative Support Occupations"},
-            {"code": "47-0000", "name": "Construction and Extraction Occupations"},
-            {"code": "49-0000", "name": "Installation, Maintenance, and Repair Occupations"},
-            {"code": "51-0000", "name": "Production Occupations"},
-            {"code": "53-0000", "name": "Transportation and Material Moving Occupations"},
-        ],
-    }
+    return get_fallback_codes_config()
 
 
 def download_if_missing(urls: List[str], target: Path) -> None:
@@ -782,15 +713,11 @@ def bls_fetch_observations(series_id: str, years_back: int = 8, top_n: int = 60)
         "startyear": str(start_year),
         "endyear": str(current_year),
     }
+    bls_key = get_bls_registration_key()
+    if bls_key:
+        payload["registrationkey"] = bls_key
 
-    response = requests.post(
-        "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        json=payload,
-        timeout=45,
-    )
-    response.raise_for_status()
-
-    body = response.json()
+    body = _bls_post_timeseries(payload)
     if body.get("status") != "REQUEST_SUCCEEDED":
         raise ValueError(f"BLS API did not return success for series {series_id}.")
 
@@ -870,14 +797,104 @@ def _bls_api_payload(series_ids: List[str], year: int) -> Dict:
         "startyear": str(year),
         "endyear": str(year),
     }
-    api_key = (
-        os.environ.get("BLS_API_KEY")
-        or os.environ.get("BLS_API_KEY_V2")
-        or os.environ.get("BLS_REGISTRATION_KEY")
-    )
+    api_key = get_bls_registration_key()
     if api_key:
         payload["registrationkey"] = api_key
     return payload
+
+
+def get_preferred_oes_metrics(soc_code: str) -> List[str]:
+    config = load_static_json_config("oes_metric_preferences.json")
+    if not isinstance(config, dict):
+        return ["A_MEAN", "A_MEDIAN", "TOT_EMP", "H_MEAN", "H_MEDIAN"]
+
+    default_order = config.get("default_order")
+    if not isinstance(default_order, list) or not default_order:
+        default_order = ["A_MEAN", "A_MEDIAN", "TOT_EMP", "H_MEAN", "H_MEDIAN"]
+
+    prefix = _soc_code_digits(soc_code)[:2]
+    overrides = config.get("soc_prefix_overrides")
+    if isinstance(overrides, dict):
+        override_list = overrides.get(prefix)
+        if isinstance(override_list, list) and override_list:
+            ordered = [m for m in override_list if m in OES_DATATYPES]
+            ordered.extend(m for m in default_order if m in OES_DATATYPES and m not in ordered)
+            return ordered
+
+    return [m for m in default_order if m in OES_DATATYPES]
+
+
+def _bls_series_has_numeric_data(series_data: List[Dict]) -> bool:
+    for item in series_data:
+        period = str(item.get("period", ""))
+        if period not in {"A01", "M13"} and not re.fullmatch(r"M\d{2}", period):
+            continue
+        raw = str(item.get("value", "")).strip().replace(",", "")
+        if not raw or raw == ".":
+            continue
+        try:
+            float(raw)
+            return True
+        except ValueError:
+            continue
+    return False
+
+
+def get_available_oes_metrics(soc_code: str, year: int = 2023, force_refresh: bool = False) -> List[str]:
+    ensure_dirs()
+    occ_digits = _soc_code_digits(soc_code)
+    preferred = get_preferred_oes_metrics(soc_code)
+    if not occ_digits:
+        return preferred
+
+    cache_file = OES_API_CACHE_DIR / f"oes_metric_available_{occ_digits}_{year}.json"
+    if not force_refresh and cache_file.exists() and cache_file.stat().st_size > 0:
+        try:
+            payload = json.loads(cache_file.read_text(encoding="utf-8"))
+            metrics = payload.get("available_metrics", []) if isinstance(payload, dict) else []
+            if isinstance(metrics, list) and metrics:
+                return [m for m in metrics if m in OES_DATATYPES]
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    metric_to_series = {
+        metric: _oes_series_id("N", "0000000", occ_digits, dtype_code)
+        for metric, dtype_code in OES_DATATYPES.items()
+    }
+
+    try:
+        payload = _bls_api_payload(list(metric_to_series.values()), year)
+        body = _bls_post_timeseries(payload)
+        if body.get("status") != "REQUEST_SUCCEEDED":
+            return preferred
+
+        available: List[str] = []
+        for series in body.get("Results", {}).get("series", []):
+            sid = str(series.get("seriesID", ""))
+            metric = next((k for k, v in metric_to_series.items() if v == sid), None)
+            if not metric:
+                continue
+            data = series.get("data", [])
+            if isinstance(data, list) and _bls_series_has_numeric_data(data):
+                available.append(metric)
+
+        ordered = [m for m in preferred if m in available]
+        if not ordered:
+            ordered = [preferred[0]] if preferred else ["A_MEAN"]
+
+        cache_file.write_text(
+            json.dumps({"soc_code": soc_code, "year": year, "available_metrics": ordered}, indent=2),
+            encoding="utf-8",
+        )
+        return ordered
+    except (
+        requests.exceptions.HTTPError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout,
+        json.JSONDecodeError,
+        ValueError,
+    ):
+        return preferred
 
 
 def fetch_oes_api_cross_section(
@@ -919,20 +936,14 @@ def fetch_oes_api_cross_section(
     series_ids = list(series_map.keys())
 
     # BLS API v2 allows up to 500 series per request (registered), 50 (unregistered)
-    api_key = (
-        os.environ.get("BLS_API_KEY")
-        or os.environ.get("BLS_API_KEY_V2")
-        or os.environ.get("BLS_REGISTRATION_KEY")
-    )
+    api_key = get_bls_registration_key()
     batch_size = 500 if api_key else 50
     all_rows: List[Dict] = []
 
     for i in range(0, len(series_ids), batch_size):
         batch = series_ids[i : i + batch_size]
         payload = _bls_api_payload(batch, year)
-        resp = requests.post(BLS_API_URL, json=payload, timeout=60)
-        resp.raise_for_status()
-        body = resp.json()
+        body = _bls_post_timeseries(payload)
         if body.get("status") != "REQUEST_SUCCEEDED":
             messages = body.get("message", [])
             raise ValueError(f"BLS API error: {messages}")
@@ -968,6 +979,30 @@ def fetch_oes_api_cross_section(
     return pd.DataFrame(all_rows)
 
 
+def get_available_oes_dataset_metrics(soc_code: str, year: int = 2023) -> List[str]:
+    """Return only metrics that actually produce non-empty cross-section rows."""
+    ordered_candidates = get_available_oes_metrics(soc_code, year=year)
+    if not ordered_candidates:
+        ordered_candidates = get_preferred_oes_metrics(soc_code)
+
+    available: List[str] = []
+    for metric in ordered_candidates:
+        try:
+            df = fetch_oes_api_cross_section(soc_code, metric=metric, year=year)
+            if not df.empty:
+                available.append(metric)
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,
+            json.JSONDecodeError,
+            ValueError,
+        ):
+            continue
+
+    return available
+
+
 def save_iag_overview_raw(industry_title: str, source_url: str, payload: Dict[str, object]) -> str:
     stamp = utc_stamp()
     filename = f"iag-overview-{sanitize_filename(industry_title)}-{stamp}.json"
@@ -995,6 +1030,57 @@ def _format_soc_code(code_digits: str) -> str:
 
 def _soc_code_digits(code: str) -> str:
     return re.sub(r"\D", "", code or "")
+
+
+def _management_oes_profiles(profiles: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """Keep Management Occupations (11-xxxx), with major group first."""
+    selected: List[Dict[str, str]] = []
+    seen_codes = set()
+    for row in profiles:
+        soc_code = str(row.get("soc_code", ""))
+        digits = _soc_code_digits(soc_code)
+        if not digits.startswith("11"):
+            continue
+        seen_codes.add(soc_code)
+        selected.append(row)
+
+    # If cached structure data is sparse, enrich from fallback SOC config.
+    for row in _default_oes_profiles():
+        soc_code = str(row.get("soc_code", ""))
+        digits = _soc_code_digits(soc_code)
+        if not digits.startswith("11") or soc_code in seen_codes:
+            continue
+        selected.append(row)
+        seen_codes.add(soc_code)
+
+    if not selected:
+        return profiles
+
+    selected.sort(key=lambda x: (x.get("soc_code", ""), x.get("soc_name", "")))
+    major = [r for r in selected if _soc_code_digits(str(r.get("soc_code", ""))) == "110000"]
+    detailed = [r for r in selected if _soc_code_digits(str(r.get("soc_code", ""))) != "110000"]
+    return major + detailed
+
+
+def _oes_dimension_links(oes_table_links: List[Dict[str, str]], scope: str) -> List[Dict[str, str]]:
+    scope_key = scope.strip().lower()
+    out: List[Dict[str, str]] = []
+    for row in oes_table_links:
+        label = str(row.get("label", ""))
+        section = str(row.get("section", ""))
+        label_lower = label.lower()
+        section_lower = section.lower()
+
+        if scope_key == "industry":
+            if "industry" in label_lower:
+                out.append(row)
+        elif scope_key == "metropolitan and nonmetropolitan area":
+            if section_lower in {"msa", "nonmsa"} or "metropolitan" in label_lower or "nonmetropolitan" in label_lower:
+                out.append(row)
+        else:
+            if section_lower == "state" or "state" in label_lower:
+                out.append(row)
+    return out
 
 
 def _default_oes_profiles() -> List[Dict[str, str]]:
@@ -1745,7 +1831,7 @@ def _category_mapped_series(fred_key: str, code: str, industry_name: str) -> Opt
 
 
 def fred_find_unemployment_series(code_type: str, code: str, industry_name: str) -> Optional[Dict[str, str]]:
-    fred_key = os.getenv("FRED_API_KEY", "").strip()
+    fred_key = get_fred_api_key()
     if not fred_key:
         return None
 
@@ -1758,7 +1844,7 @@ def fred_find_unemployment_series(code_type: str, code: str, industry_name: str)
 
 
 def fred_series_observations(series_id: str) -> pd.DataFrame:
-    fred_key = os.getenv("FRED_API_KEY", "").strip()
+    fred_key = get_fred_api_key()
     if not fred_key:
         return pd.DataFrame()
 
@@ -1768,9 +1854,25 @@ def fred_series_observations(series_id: str) -> pd.DataFrame:
         "file_type": "json",
     }
 
-    response = requests.get(FRED_OBS_URL, params=params, timeout=30)
-    response.raise_for_status()
-    observations = response.json().get("observations", [])
+    observations: List[Dict[str, object]] = []
+    for _ in range(3):
+        try:
+            response = requests.get(FRED_OBS_URL, params=params, timeout=30)
+            response.raise_for_status()
+            observations = response.json().get("observations", [])
+            break
+        except requests.exceptions.HTTPError as ex:
+            status = ex.response.status_code if ex.response is not None else None
+            # FRED sometimes returns intermittent 5xx (and occasionally 404 for stale series IDs).
+            # Treat these as no-data conditions so the report still renders.
+            if status in {404, 500, 502, 503, 504}:
+                continue
+            raise
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, json.JSONDecodeError):
+            continue
+
+    if not observations:
+        return pd.DataFrame()
 
     rows = []
     for obs in observations:
@@ -1859,26 +1961,64 @@ def summarize_with_huggingface(text: str) -> Optional[str]:
         + text[:5000]
     )
 
+    diagnostics: List[str] = []
     for model_name in model_candidates:
-        payload = {
-            "inputs": prompt,
-            "parameters": {
-                "max_new_tokens": 220,
-                "temperature": 0.2,
-                "return_full_text": False,
-            },
-        }
         try:
+            chat_payload = {
+                "model": model_name,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are a concise labor-market analyst. Return markdown only.",
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    },
+                ],
+                "max_tokens": 220,
+                "temperature": 0.2,
+            }
+
             endpoints = [
-                f"https://api-inference.huggingface.co/models/{model_name}",
-                f"https://router.huggingface.co/hf-inference/models/{model_name}",
+                ("https://router.huggingface.co/v1/chat/completions", chat_payload, "chat"),
+                (
+                    f"https://router.huggingface.co/hf-inference/models/{model_name}",
+                    {
+                        "inputs": prompt,
+                        "parameters": {
+                            "max_new_tokens": 220,
+                            "temperature": 0.2,
+                            "return_full_text": False,
+                        },
+                    },
+                    "inference-router",
+                ),
+                (
+                    f"https://api-inference.huggingface.co/models/{model_name}",
+                    {
+                        "inputs": prompt,
+                        "parameters": {
+                            "max_new_tokens": 220,
+                            "temperature": 0.2,
+                            "return_full_text": False,
+                        },
+                    },
+                    "inference-api",
+                ),
             ]
             data = None
-            for endpoint in endpoints:
+            route_kind = ""
+            for endpoint, payload, route_kind in endpoints:
                 response = requests.post(endpoint, headers=headers, json=payload, timeout=90)
                 if response.status_code in {401, 403}:
+                    diagnostics.append(f"{model_name} {route_kind} auth:{response.status_code}")
                     continue
                 if response.status_code in {404, 429, 500, 502, 503, 504}:
+                    diagnostics.append(f"{model_name} {route_kind} retryable:{response.status_code}")
+                    continue
+                if response.status_code >= 400:
+                    diagnostics.append(f"{model_name} {route_kind} err:{response.status_code}")
                     continue
                 response.raise_for_status()
                 data = response.json()
@@ -1894,6 +2034,13 @@ def summarize_with_huggingface(text: str) -> Optional[str]:
                 if isinstance(first, dict) and "generated_text" in first:
                     return str(first["generated_text"]).strip()
 
+            if isinstance(data, dict) and "choices" in data and isinstance(data["choices"], list) and data["choices"]:
+                choice = data["choices"][0]
+                if isinstance(choice, dict):
+                    message = choice.get("message")
+                    if isinstance(message, dict) and "content" in message:
+                        return str(message["content"]).strip()
+
             if isinstance(data, dict) and "summary_text" in data:
                 return str(data["summary_text"]).strip()
             if isinstance(data, dict) and "generated_text" in data:
@@ -1906,7 +2053,11 @@ def summarize_with_huggingface(text: str) -> Optional[str]:
         ):
             continue
 
-    return None
+    reason = "; ".join(diagnostics[:4]) if diagnostics else "no successful endpoint response"
+    return (
+        "Hugging Face inference did not return content for configured models. "
+        f"Diagnostic: {reason}."
+    )
 
 
 def create_summary_markdown(
@@ -2104,9 +2255,38 @@ def index():
     series_obs_rows = None
     series_obs_plot_html = None
 
-    selected_soc_code = request.form.get("soc_code", oes_profiles[0]["soc_code"] if oes_profiles else "")
+    management_oes_profiles = _management_oes_profiles(oes_profiles)
+    selected_soc_code = request.form.get("soc_code", management_oes_profiles[0]["soc_code"] if management_oes_profiles else "")
     selected_oes_table_url = request.form.get("oes_table_url", oes_table_links[0]["url"] if oes_table_links else "")
-    selected_oes_metric = request.form.get("oes_metric", "A_MEAN")
+    selected_oes_scope = request.form.get("oes_scope", "State")
+    selected_oes_measure = request.form.get("oes_measure", "Employment")
+    try:
+        selected_oes_year = int(request.form.get("oes_year", "2023"))
+    except (TypeError, ValueError):
+        selected_oes_year = 2023
+    current_year = utc_now().year
+    selected_oes_year = max(2000, min(current_year, selected_oes_year))
+    try:
+        display_records = int(request.form.get("display_records", "25"))
+    except (TypeError, ValueError):
+        display_records = 25
+    display_records = max(5, min(500, display_records))
+
+    available_oes_metrics = (
+        get_available_oes_dataset_metrics(selected_soc_code, year=selected_oes_year)
+        if selected_soc_code
+        else []
+    )
+    if selected_oes_measure == "Employment":
+        available_oes_metrics = [m for m in available_oes_metrics if m == "TOT_EMP"]
+    selected_oes_metric = request.form.get(
+        "oes_metric",
+        available_oes_metrics[0] if available_oes_metrics else "",
+    )
+    if selected_oes_metric not in available_oes_metrics and available_oes_metrics:
+        selected_oes_metric = available_oes_metrics[0]
+
+    oes_dimension_links = _oes_dimension_links(oes_table_links, selected_oes_scope)
     oes_profile_title = None
     oes_profile_report_file = None
     oes_profile_report_html = None
@@ -2195,7 +2375,7 @@ def index():
         elif form_type == "oes_profile":
             active_tab = "oes_profiles"
             selected_soc_code = request.form.get("soc_code", "")
-            selected_row = next((row for row in oes_profiles if row["soc_code"] == selected_soc_code), None)
+            selected_row = next((row for row in management_oes_profiles if row["soc_code"] == selected_soc_code), None)
             if not selected_row:
                 error = "Please choose a valid SOC occupation profile."
             else:
@@ -2220,35 +2400,81 @@ def index():
         elif form_type == "oes_dataset":
             active_tab = "oes_profiles"
             selected_soc_code = request.form.get("soc_code", "")
-            selected_oes_metric = request.form.get("oes_metric", "A_MEAN")
+            selected_oes_scope = request.form.get("oes_scope", "State")
+            selected_oes_measure = request.form.get("oes_measure", "Employment")
+            try:
+                selected_oes_year = int(request.form.get("oes_year", "2023"))
+            except (TypeError, ValueError):
+                selected_oes_year = 2023
+            selected_oes_year = max(2000, min(current_year, selected_oes_year))
+            try:
+                display_records = int(request.form.get("display_records", "25"))
+            except (TypeError, ValueError):
+                display_records = 25
+            display_records = max(5, min(500, display_records))
+
+            available_oes_metrics = (
+                get_available_oes_dataset_metrics(selected_soc_code, year=selected_oes_year)
+                if selected_soc_code
+                else []
+            )
+            if selected_oes_measure == "Employment":
+                available_oes_metrics = [m for m in available_oes_metrics if m == "TOT_EMP"]
+            selected_oes_metric = request.form.get(
+                "oes_metric",
+                available_oes_metrics[0] if available_oes_metrics else "",
+            )
+            if selected_oes_metric not in available_oes_metrics and available_oes_metrics:
+                selected_oes_metric = available_oes_metrics[0]
+
+            oes_dimension_links = _oes_dimension_links(oes_table_links, selected_oes_scope)
 
             if not selected_soc_code:
                 error = "Please select a SOC code."
+            elif selected_oes_scope != "State":
+                error = (
+                    "This app's plotting pipeline is API-first and currently supports State scope via BLS API. "
+                    "Choose State to fetch and plot directly without zip downloads."
+                )
+            elif not available_oes_metrics:
+                error = f"No supported OES metrics returned data for SOC {selected_soc_code} in {selected_oes_year}."
             else:
                 try:
                     dataset_df = fetch_oes_api_cross_section(
                         selected_soc_code,
                         metric=selected_oes_metric,
-                        year=2023,
+                        year=selected_oes_year,
                     )
                     if dataset_df.empty:
+                        fallback_metric = next((m for m in available_oes_metrics if m != selected_oes_metric), None)
+                        if fallback_metric:
+                            retry_df = fetch_oes_api_cross_section(
+                                selected_soc_code,
+                                metric=fallback_metric,
+                                year=selected_oes_year,
+                            )
+                            if not retry_df.empty:
+                                dataset_df = retry_df
+                                selected_oes_metric = fallback_metric
+
+                    if dataset_df.empty:
                         error = (
-                            f"No data returned from BLS API for SOC {selected_soc_code} / "
-                            f"{selected_oes_metric} (2023). The series may not exist for this occupation."
+                            f"No data returned from BLS API for SOC {selected_soc_code} in {selected_oes_year}. "
+                            "Try a different SOC code."
                         )
                     else:
                         oes_state_map_html = build_state_choropleth(
                             dataset_df,
                             selected_oes_metric,
-                            title=f"State-Level {selected_oes_metric} for SOC {selected_soc_code} (2023)",
+                            title=f"State-Level {selected_oes_metric} for SOC {selected_soc_code} ({selected_oes_year})",
                         )
                         oes_top_areas_plot_html = build_top_areas_bar(
                             dataset_df,
                             selected_oes_metric,
-                            title=f"Top States by {selected_oes_metric} for SOC {selected_soc_code} (2023)",
+                            title=f"Top States by {selected_oes_metric} for SOC {selected_soc_code} ({selected_oes_year})",
                         )
                         preview_cols = [c for c in ["AREA_TITLE", "PRIM_STATE", selected_oes_metric, "OCC_CODE", "YEAR"] if c in dataset_df.columns]
-                        oes_dataset_preview = dataset_df[preview_cols].fillna("").to_dict(orient="records")
+                        oes_dataset_preview = dataset_df[preview_cols].fillna("").head(display_records).to_dict(orient="records")
 
                         stamp = utc_stamp()
                         oes_dataset_file = f"oes-api-{sanitize_filename(selected_soc_code)}-{selected_oes_metric}-{stamp}.json"
@@ -2256,7 +2482,7 @@ def index():
                             json.dumps({
                                 "soc_code": selected_soc_code,
                                 "metric": selected_oes_metric,
-                                "year": 2023,
+                                "year": selected_oes_year,
                                 "source": "BLS Public API v2",
                                 "rows": dataset_df.fillna("").to_dict(orient="records"),
                             }, indent=2),
@@ -2337,6 +2563,7 @@ def index():
         iag_error=iag_error,
         oes_error=oes_error,
         oes_profiles=oes_profiles,
+        management_oes_profiles=management_oes_profiles,
         oes_table_links=oes_table_links,
         error=error,
         selected_type=selected_type,
@@ -2360,7 +2587,14 @@ def index():
         series_obs_plot_html=series_obs_plot_html,
         selected_soc_code=selected_soc_code,
         selected_oes_table_url=selected_oes_table_url,
+        selected_oes_scope=selected_oes_scope,
+        selected_oes_measure=selected_oes_measure,
+        selected_oes_year=selected_oes_year,
+        current_year=current_year,
+        display_records=display_records,
         selected_oes_metric=selected_oes_metric,
+        available_oes_metrics=available_oes_metrics,
+        oes_dimension_links=oes_dimension_links,
         oes_profile_title=oes_profile_title,
         oes_profile_report_file=oes_profile_report_file,
         oes_profile_report_html=oes_profile_report_html,

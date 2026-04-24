@@ -10,6 +10,7 @@ This app lives in the `industry-report` folder and does the following:
 - Saves summary output as Markdown in `industry-report/summaries`
 - Saves raw result payload as JSON in `industry-report/data`
 - Uses FRED category reference data (`all_fred_categories.csv`) to improve NAICS-to-series mapping before falling back to keyword search
+- Loads static fallback and mapping structures from JSON files in `industry-report/config` for cleaner maintenance
 
 ## Environment Variables
 
@@ -41,6 +42,7 @@ Open: `http://127.0.0.1:5000`
 
 - If an API key is missing, the app still runs and reports which summary/data pieces could not be fetched.
 - BLS code files are cached under `industry-report/data` after first download.
+- Static app mappings now live in `industry-report/config/fallback_codes.json`, `industry-report/config/naics_keywords.json`, `industry-report/config/text_stopwords.json`, and `industry-report/config/oes_state_map.json`.
 - BLS Industry-at-a-Glance dropdown links are cached as `industry-report/data/iag_index_links.json`.
 - If `https://www.bls.gov/iag/tgs/iag_index_naics.htm` is blocked (e.g., HTTP 403), the app now uses local JSON cache first and then a built-in NAICS fallback list to keep the dropdown usable.
 - The BLS tab scrapes industry pages into a structured APA-style Markdown report saved under `industry-report/summaries`.
